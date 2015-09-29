@@ -19,18 +19,27 @@ public class CMSInterface {
 	public static void connect(ComInterface port) {
 
 		final int cmd = 01;
-		
-		int data = 00;
-		
+
+		int data = 00; //---No Life Tick
+
 		byte[] message = messageCreator(dst,src,cmd,data);
-//		for(byte b : message){
-//			System.out.print(b + " ");
-//		}
+
+		//---Falta processamento da mensagem---//
 		
 		port.writeBytes(message);
 	}
 
-	public static void disconnect() {
+	public static void disconnect(ComInterface port) {
+
+		final int cmd = 07;
+
+		int data = 00; //---Necessary...?
+
+		byte[] message = messageCreator(dst,src,cmd,data);
+
+		//---Falta processamento da mensagem---//
+		
+		port.writeBytes(message);
 
 	}
 
@@ -51,19 +60,19 @@ public class CMSInterface {
 		byte[] src_a = intToByteArray2(src);
 		byte[] cmd_a = intToByteArray2(cmd);
 		byte[] data_a = intToByteArray2(data);
-		
+
 		msg.add(dst_a[0]);
 		msg.add(dst_a[1]);
 		msg.add(src_a[0]);
 		msg.add(src_a[1]);
 		msg.add(cmd_a[0]);
 		msg.add(cmd_a[1]);
-		
+
 		msg.add(data_a[0]);
 		msg.add(data_a[1]);
-		
+
 		byte[] length_a = intToByteArray2(msg.size()+2);
-		
+
 		msg.add(0,(byte) 27);
 		msg.add(1,length_a[0]);
 		msg.add(2,length_a[1]);
