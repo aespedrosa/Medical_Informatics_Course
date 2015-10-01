@@ -159,11 +159,23 @@ public class appInterface extends javax.swing.JFrame {
 			if (object == openButton)
 				openButton_actionPerformed(event);
 			if (object == closeButton)
-				closeButton_actionPerformed(event);
+				try {
+					closeButton_actionPerformed(event);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
 			if (object == connButton)
-				connButton_actionPerformed(event);
+				try {
+					connButton_actionPerformed(event);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			if (object == disconnButton)
-				disconnButton_actionPerformed(event);
+				try {
+					disconnButton_actionPerformed(event);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			if (object == getParButton)
 				getParButton_actionPerformed(event);
 			if (object == singleTuneButton)
@@ -182,7 +194,7 @@ public class appInterface extends javax.swing.JFrame {
 
 	}
 
-	void closeButton_actionPerformed(java.awt.event.ActionEvent event) {
+	void closeButton_actionPerformed(java.awt.event.ActionEvent event) throws InterruptedException {
 		if (connected)
 			CMSInterface.disconnect(port);
 		try {
@@ -200,7 +212,7 @@ public class appInterface extends javax.swing.JFrame {
 
 	}
 
-	void connButton_actionPerformed(java.awt.event.ActionEvent event) {
+	void connButton_actionPerformed(java.awt.event.ActionEvent event) throws InterruptedException {
 		disconnButton.setEnabled(true);
 		getParButton.setEnabled(true);
 		invertCheckBox.setEnabled(true);
@@ -210,7 +222,7 @@ public class appInterface extends javax.swing.JFrame {
 
 	}
 
-	void disconnButton_actionPerformed(java.awt.event.ActionEvent event) {
+	void disconnButton_actionPerformed(java.awt.event.ActionEvent event) throws InterruptedException {
 		disconnButton.setEnabled(false);
 		connButton.setEnabled(true);
 		getParButton.setEnabled(false);
