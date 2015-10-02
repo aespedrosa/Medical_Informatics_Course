@@ -40,8 +40,10 @@ public class CMSInterface {
 		Thread.sleep(1000);
 		byte[] response = port.readBytes();
 		
-		System.out.println("---Message received: ");
-		System.out.println("Size: " + response.length);
+		String rsp_string=messageReader(response)
+
+		System.out.println("---Message received---");
+		System.out.println(rsp_string);
 		System.out.println("------------------");
 		
 	}
@@ -58,8 +60,10 @@ public class CMSInterface {
 		Thread.sleep(1000);
 		byte[] response = port.readBytes();
 		
-		System.out.println("---Message received: ");
-		System.out.println("Size: " + response.length);
+		String rsp_string=messageReader(response)
+
+		System.out.println("---Message received---");
+		System.out.println(rsp_string);
 		System.out.println("------------------");
 
 	}
@@ -125,8 +129,63 @@ public class CMSInterface {
 	
 	//TODO 
 	public static String messageReader(byte[] msg){
-		String printmensage = null;
-		return printmensage;
+		ArrayList <Byte> finalmsg=new ArrayList<Byte>();
+
+		for(int i=0; i<msg.length;i++){
+
+			if(msg[i]==0x1B && msg[i+1]!=0xFF){
+				continue;
+			}
+			else if(msg[i]==0xFF && msg[i-1]==0x1B){
+				continue;
+			}
+			else{
+				finalmsg.add(msg[i])
+			}
+		}
+
+		int i=0;
+		while(i<finalmsg.size()){
+			byte temp = finalmsg.get(i);
+			byte temp2 = finalmsg.get(i+1);
+			finalmsg.set(i, temp2);
+			finalmsg.set(i+1, temp);
+			i = i+2;
+		}
+
+
+		int cmd=ByteArray2toInt(finalmsg.get(6),finalmsg.get(7));		
+
+		return printmessage(int cmd, ArrayList<Byte> finalmsg);
+	}
+
+	public static String printmessage(int cmd, ArrayList<Byte> finalmsg){
+		int comp=(int) finalmsg.get(0)*256+(int) finalmsg.get(1);
+		int dst_id=(int) finalmsg.get(2)*256+(int) finalmsg.get(3);
+		int src_id=(int) finalmsg.get(4)*256+(int) finalmsg.get(5);
+
+		if(cmd==2){
+			int window_size=ByteArray2toInt(finalmsg.get(8),finalmsg.get(9));
+			int compat_high=finalmsg.get(10);
+			int compat_low=finalmsg.get(11);
+			int return_value=ByteArray2toInt(finalmsg.get(12),finalmsg.get(13));
+			int error_value=ByteArray2toInt(finalmsg.get(14),finalmsg.get(15));
+
+			String connect_rsp="Window Size: "+window_size+ "\nCompat High: "+ compat_high+"\nCompat Low: "+ compat_low +"\nReturn Value: "+ 
+			error_value+"\nError Value: "+ error_value;
+			return connect_rsp;
+		}
+
+		else if(cmd==8){
+			int resp=ByteArray2toInt(finalmsg.get(8),finalmsg.get(9));
+			String disconnect_rsp="Disconnect Response: "+resp;
+			return disconnect_rsp;
+		}
+
+		else{
+			return null;
+		}
+
 	}
 
 	public static byte[] intToByteArray2(int value){
@@ -134,6 +193,11 @@ public class CMSInterface {
 		array[0] = (byte) (value/256);
 		array[1] = (byte) (value%256);
 		return array;
+	}
+
+	public static int ByteArray2toInt(byte one,byte two){
+		int number=one*256+two;
+		return number;
 	}
 
 	public static byte[] toPrimitive(Byte[] array) {
