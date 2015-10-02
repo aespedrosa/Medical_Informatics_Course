@@ -1,14 +1,13 @@
 package main;
 
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Simple program to open communications ports and connect to Agilent Monitor
- * Agilent Communication Interface - TO BE IMPLEMENTED
- * @version 1.2 - 30 Set 2003
- * @author Francisco Cardoso (fmcc@student.dei.uc.pt)
- * @author Ricardo Sal (ricsal@student.dei.uc.pt)
+ * Agilent Communication Interface
+ * @version 1.0 - 30 Set 2003
+ * @author Alexandre Sayal
+ * @author André Pedrosa
  */
 
 
@@ -16,14 +15,9 @@ public class CMSInterface {
 
 	final static int dst = 32865;
 	final static int src = 10;
-	
-//	public static void main(String[] args) throws InterruptedException {
-//		connect();
-//	}
-	
+		
 	public static void connect(ComInterface port) throws InterruptedException {
 
-		// 
 		final int cmd = 01;
 
 		int data = 00; //---No Life Tick
@@ -40,7 +34,7 @@ public class CMSInterface {
 		Thread.sleep(1000);
 		byte[] response = port.readBytes();
 		
-		String rsp_string=messageReader(response)
+		String rsp_string=messageReader(response);
 
 		System.out.println("---Message received---");
 		System.out.println(rsp_string);
@@ -60,7 +54,7 @@ public class CMSInterface {
 		Thread.sleep(1000);
 		byte[] response = port.readBytes();
 		
-		String rsp_string=messageReader(response)
+		String rsp_string=messageReader(response);
 
 		System.out.println("---Message received---");
 		System.out.println(rsp_string);
@@ -102,10 +96,8 @@ public class CMSInterface {
 		//---Switch bytes 2by2
 		int i=0;
 		while(i<msg.size()){
-			byte temp;
-			byte temp2;
-			temp = msg.get(i);
-			temp2 = msg.get(i+1);
+			byte temp = msg.get(i);
+			byte temp2 = msg.get(i+1);
 			msg.set(i, temp2);
 			msg.set(i+1, temp);
 			i = i+2;
@@ -127,65 +119,63 @@ public class CMSInterface {
 
 	}
 	
-	//TODO 
 	public static String messageReader(byte[] msg){
-		ArrayList <Byte> finalmsg=new ArrayList<Byte>();
+		ArrayList <Byte> decodedmessage=new ArrayList<Byte>();
 
+		//---Search for 1B (message start) and FF.
 		for(int i=0; i<msg.length;i++){
-
-			if(msg[i]==0x1B && msg[i+1]!=0xFF){
-				continue;
-			}
-			else if(msg[i]==0xFF && msg[i-1]==0x1B){
+			if((msg[i]==0x1B && msg[i+1]!=0xFF) || (msg[i]==0xFF && msg[i-1]==0x1B)){
 				continue;
 			}
 			else{
-				finalmsg.add(msg[i])
+				decodedmessage.add(msg[i]);
 			}
 		}
 
+		//---Switch bytes 2by2
 		int i=0;
-		while(i<finalmsg.size()){
-			byte temp = finalmsg.get(i);
-			byte temp2 = finalmsg.get(i+1);
-			finalmsg.set(i, temp2);
-			finalmsg.set(i+1, temp);
+		while(i<decodedmessage.size()){
+			byte temp = decodedmessage.get(i);
+			byte temp2 = decodedmessage.get(i+1);
+			decodedmessage.set(i, temp2);
+			decodedmessage.set(i+1, temp);
 			i = i+2;
 		}
 
+		//---Determine command type
+		int cmd = byte2toInt(decodedmessage.get(6),decodedmessage.get(7));		
 
-		int cmd=ByteArray2toInt(finalmsg.get(6),finalmsg.get(7));		
-
-		return printmessage(int cmd, ArrayList<Byte> finalmsg);
+		//---Return formated string
+		return printmessage(cmd,decodedmessage);
 	}
 
 	public static String printmessage(int cmd, ArrayList<Byte> finalmsg){
-		int comp=(int) finalmsg.get(0)*256+(int) finalmsg.get(1);
-		int dst_id=(int) finalmsg.get(2)*256+(int) finalmsg.get(3);
-		int src_id=(int) finalmsg.get(4)*256+(int) finalmsg.get(5);
+		int comp = byte2toInt(finalmsg.get(0),finalmsg.get(1));
+		int dst_id = byte2toInt(finalmsg.get(2),finalmsg.get(3));
+		int src_id = byte2toInt(finalmsg.get(4),finalmsg.get(5));
+		
+		String general_string = "Command: " + cmd + " Destination ID: " + dst_id + " Source ID: "
+									+ src_id + " Length: " + comp + "\n";
+		
+		if(cmd==2){ //---Connect Response
+			int window_size = byte2toInt(finalmsg.get(8),finalmsg.get(9));
+			int compat_high = finalmsg.get(10);
+			int compat_low = finalmsg.get(11);
+			int return_value = byte2toInt(finalmsg.get(12),finalmsg.get(13));
+			int error_value = byte2toInt(finalmsg.get(14),finalmsg.get(15));
 
-		if(cmd==2){
-			int window_size=ByteArray2toInt(finalmsg.get(8),finalmsg.get(9));
-			int compat_high=finalmsg.get(10);
-			int compat_low=finalmsg.get(11);
-			int return_value=ByteArray2toInt(finalmsg.get(12),finalmsg.get(13));
-			int error_value=ByteArray2toInt(finalmsg.get(14),finalmsg.get(15));
-
-			String connect_rsp="Window Size: "+window_size+ "\nCompat High: "+ compat_high+"\nCompat Low: "+ compat_low +"\nReturn Value: "+ 
-			error_value+"\nError Value: "+ error_value;
-			return connect_rsp;
+			String connect_rsp = "Window Size: " + window_size + "\nCompat High: " + compat_high + "\nCompat Low: " + compat_low + "\nReturn Value: " + 
+								return_value + "\nError Value: "+ error_value;
+			return general_string+connect_rsp;
 		}
-
-		else if(cmd==8){
-			int resp=ByteArray2toInt(finalmsg.get(8),finalmsg.get(9));
-			String disconnect_rsp="Disconnect Response: "+resp;
-			return disconnect_rsp;
+		else if(cmd==8){ //---Disconnect Response
+			int resp = byte2toInt(finalmsg.get(8),finalmsg.get(9));
+			String disconnect_rsp = "Disconnect Response: " + resp;
+			return general_string+disconnect_rsp;
 		}
-
 		else{
 			return null;
 		}
-
 	}
 
 	public static byte[] intToByteArray2(int value){
@@ -195,8 +185,8 @@ public class CMSInterface {
 		return array;
 	}
 
-	public static int ByteArray2toInt(byte one,byte two){
-		int number=one*256+two;
+	public static int byte2toInt(byte one,byte two){
+		int number = one*256 + two;
 		return number;
 	}
 
