@@ -5,7 +5,7 @@ import java.util.ArrayList;
 /**
  * Simple program to open communications ports and connect to Agilent Monitor
  * Agilent Communication Interface
- * @version 1.0 - 30 Set 2003
+ * @version 1.0 - 2015
  * @author Alexandre Sayal
  * @author André Pedrosa
  */
@@ -38,7 +38,7 @@ public class CMSInterface {
 
 		System.out.println("---Message received---");
 		System.out.println(rsp_string);
-		System.out.println("------------------");
+		System.out.println("----------------------");
 		
 	}
 
@@ -54,11 +54,11 @@ public class CMSInterface {
 		Thread.sleep(1000);
 		byte[] response = port.readBytes();
 		
-		String rsp_string=messageReader(response);
+		String rsp_string = messageReader(response);
 
 		System.out.println("---Message received---");
 		System.out.println(rsp_string);
-		System.out.println("------------------");
+		System.out.println("----------------------");
 
 	}
 
@@ -94,14 +94,7 @@ public class CMSInterface {
 		msg.add(1,length_a[1]);
 		
 		//---Switch bytes 2by2
-		int i=0;
-		while(i<msg.size()){
-			byte temp = msg.get(i);
-			byte temp2 = msg.get(i+1);
-			msg.set(i, temp2);
-			msg.set(i+1, temp);
-			i = i+2;
-		}
+		msg = byteSwitcher(msg);
 		
 		//---Search for 1Bh and add FFh
 		if(msg.contains((byte) 0x1B)){
@@ -116,7 +109,6 @@ public class CMSInterface {
 		msg.toArray(finalmsg);
 
 		return toPrimitive(finalmsg);
-
 	}
 	
 	public static String messageReader(byte[] msg){
@@ -133,14 +125,7 @@ public class CMSInterface {
 		}
 
 		//---Switch bytes 2by2
-		int i=0;
-		while(i<decodedmessage.size()){
-			byte temp = decodedmessage.get(i);
-			byte temp2 = decodedmessage.get(i+1);
-			decodedmessage.set(i, temp2);
-			decodedmessage.set(i+1, temp);
-			i = i+2;
-		}
+		decodedmessage = byteSwitcher(decodedmessage);
 
 		//---Determine command type
 		int cmd = byte2toInt(decodedmessage.get(6),decodedmessage.get(7));		
@@ -166,11 +151,13 @@ public class CMSInterface {
 
 			String connect_rsp = "Window Size: " + window_size + "\nCompat High: " + compat_high + "\nCompat Low: " + compat_low + "\nReturn Value: " + 
 								return_value + "\nError Value: "+ error_value;
+			
 			return general_string+connect_rsp;
 		}
 		else if(cmd==8){ //---Disconnect Response
 			int resp = byte2toInt(finalmsg.get(8),finalmsg.get(9));
 			String disconnect_rsp = "Disconnect Response: " + resp;
+			
 			return general_string+disconnect_rsp;
 		}
 		else{
@@ -178,6 +165,18 @@ public class CMSInterface {
 		}
 	}
 
+	public static ArrayList<Byte> byteSwitcher(ArrayList<Byte> msg){
+		int i=0;
+		while(i<msg.size()){
+			byte temp = msg.get(i);
+			byte temp2 = msg.get(i+1);
+			msg.set(i, temp2);
+			msg.set(i+1, temp);
+			i = i+2;
+		}
+		return msg;
+	}
+	
 	public static byte[] intToByteArray2(int value){
 		byte[] array = new byte[2];
 		array[0] = (byte) (value/256);
