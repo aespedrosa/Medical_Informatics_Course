@@ -31,14 +31,14 @@ public class CMSInterface {
 		System.out.println("\n--End--------");
 		
 		port.writeBytes(message);
-		Thread.sleep(1000);
-		byte[] response = port.readBytes();
-		
-		String rsp_string=messageReader(response);
-
-		System.out.println("---Message received---");
-		System.out.println(rsp_string);
-		System.out.println("----------------------");
+//		Thread.sleep(1000);
+//		byte[] response = port.readBytes();
+//		
+//		String rsp_string=messageReader(response);
+//
+//		System.out.println("---Message received---");
+//		System.out.println(rsp_string);
+//		System.out.println("----------------------");
 		
 	}
 
@@ -51,19 +51,26 @@ public class CMSInterface {
 		byte[] message = messageCreator(dst,src,cmd,data);
 		
 		port.writeBytes(message);
-		Thread.sleep(1000);
-		byte[] response = port.readBytes();
-		
-		String rsp_string = messageReader(response);
-
-		System.out.println("---Message received---");
-		System.out.println(rsp_string);
-		System.out.println("----------------------");
+//		Thread.sleep(1000);
+//		byte[] response = port.readBytes();
+//		
+//		String rsp_string = messageReader(response);
+//
+//		System.out.println("---Message received---");
+//		System.out.println(rsp_string);
+//		System.out.println("----------------------");
 
 	}
 
-	public static void getParList() {
+	public static void getParList(ComInterface port) throws InterruptedException {
+		
+		final int cmd = 11;
 
+		int data = 00; //---Necessary?
+
+		byte[] message = messageCreator(dst,src,cmd,data);
+		
+		port.writeBytes(message);
 	}
 
 	public static void singleTuneRequest(int id) {
@@ -113,7 +120,7 @@ public class CMSInterface {
 	
 	public static String messageReader(byte[] msg){
 		ArrayList <Byte> decodedmessage=new ArrayList<Byte>();
-
+		
 		//---Search for 1B (message start) and FF.
 		for(int i=0; i<msg.length;i++){
 			if((msg[i]==0x1B && msg[i+1]!=0xFF) || (msg[i]==0xFF && msg[i-1]==0x1B)){
@@ -126,9 +133,11 @@ public class CMSInterface {
 
 		//---Switch bytes 2by2
 		decodedmessage = byteSwitcher(decodedmessage);
-
+		
 		//---Determine command type
-		int cmd = byte2toInt(decodedmessage.get(6),decodedmessage.get(7));		
+		int cmd = byte2toInt(decodedmessage.get(6),decodedmessage.get(7));
+		
+		System.out.println("\nCMD: " + cmd);
 
 		//---Return formated string
 		return printmessage(cmd,decodedmessage);
@@ -146,8 +155,8 @@ public class CMSInterface {
 			int window_size = byte2toInt(finalmsg.get(8),finalmsg.get(9));
 			int compat_high = finalmsg.get(10);
 			int compat_low = finalmsg.get(11);
-			int return_value = byte2toInt(finalmsg.get(12),finalmsg.get(13));
-			int error_value = byte2toInt(finalmsg.get(14),finalmsg.get(15));
+			int return_value = finalmsg.get(12);
+			int error_value = finalmsg.get(13);
 
 			String connect_rsp = "Window Size: " + window_size + "\nCompat High: " + compat_high + "\nCompat Low: " + compat_low + "\nReturn Value: " + 
 								return_value + "\nError Value: "+ error_value;
@@ -159,6 +168,18 @@ public class CMSInterface {
 			String disconnect_rsp = "Disconnect Response: " + resp;
 			
 			return general_string+disconnect_rsp;
+		}
+		else if(cmd==12){ //---ParList Response
+			int actual = finalmsg.get(8);
+			int total = finalmsg.get(9);
+			int msg_id = finalmsg.get(10); //---TODO Pode nao ter so 1 byte
+			String temp = "";
+			for(int b=11 ; b<finalmsg.size();b++){
+				temp = temp + finalmsg.get(b);
+			}
+			String parlist_rsp = "Actual: " + actual + "Total: " + total + "Msg_ID: " + msg_id + "\nMessage: " + temp;
+		
+			return parlist_rsp;
 		}
 		else{
 			return null;

@@ -30,6 +30,7 @@ public class appInterface extends javax.swing.JFrame {
 	private JCheckBox invertCheckBox = new javax.swing.JCheckBox("Invert Bits");
 	private JTextField idTextField = new javax.swing.JTextField();
 	private JLabel idLabel = new javax.swing.JLabel();
+	private Thread thread_read;
 
 	public appInterface() {
 
@@ -105,7 +106,8 @@ public class appInterface extends javax.swing.JFrame {
 
 	static public void main(String args[]) {
 		try {
-			(new appInterface()).setVisible(true);
+			appInterface intface = (new appInterface());
+			intface.setVisible(true);
 		} catch (Throwable t) {
 			t.printStackTrace();
 			System.exit(1);
@@ -177,7 +179,12 @@ public class appInterface extends javax.swing.JFrame {
 					e.printStackTrace();
 				}
 			if (object == getParButton)
-				getParButton_actionPerformed(event);
+				try {
+					getParButton_actionPerformed(event);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			if (object == singleTuneButton)
 				singleTuneButton_actionPerformed(event);
 
@@ -191,12 +198,37 @@ public class appInterface extends javax.swing.JFrame {
 		openButton.setEnabled(false);
 		closeButton.setEnabled(true);
 		connButton.setEnabled(true);
-
+		
+		ComInterface cominterface = this.port;
+		
+		//---Thread for Reading COM Buffer
+		this.thread_read = new Thread(new Runnable() {
+			public void run(){
+				while(true){
+					try {
+						byte[] msg = cominterface.readBytes();
+						
+						if(msg.length!=0){
+							System.out.println("=====NEW MESSAGE=====");
+							System.out.println(CMSInterface.messageReader(msg));
+						}
+						
+						Thread.sleep(1000); //Timer 100ms
+						
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});  
+		this.thread_read.start();
 	}
 
+	@SuppressWarnings("deprecation")
 	void closeButton_actionPerformed(java.awt.event.ActionEvent event) throws InterruptedException {
 		if (connected)
 			CMSInterface.disconnect(port);
+			this.thread_read.stop();
 		try {
 			Thread.sleep(300);
 		} catch (Exception e) {
@@ -219,7 +251,6 @@ public class appInterface extends javax.swing.JFrame {
 		CMSInterface.connect(port);
 		connected = true;
 
-
 	}
 
 	void disconnButton_actionPerformed(java.awt.event.ActionEvent event) throws InterruptedException {
@@ -235,8 +266,8 @@ public class appInterface extends javax.swing.JFrame {
 	}
 
 
-	void getParButton_actionPerformed(java.awt.event.ActionEvent event) {
-		CMSInterface.getParList();
+	void getParButton_actionPerformed(java.awt.event.ActionEvent event) throws InterruptedException {
+		CMSInterface.getParList(port);
 		singleTuneButton.setEnabled(false);
 		idTextField.setEnabled(false);
 
