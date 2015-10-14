@@ -204,16 +204,27 @@ public class appInterface extends javax.swing.JFrame {
 		//---Thread for Reading COM Buffer
 		this.thread_read = new Thread(new Runnable() {
 			public void run(){
+				BufferTest bufferObject = new BufferTest();
+				
 				while(true){
 					try {
 						byte[] msg = cominterface.readBytes();
 						
 						if(msg.length!=0){
-							System.out.println("=====NEW MESSAGE=====");
-							System.out.println(CMSInterface.messageReader(msg));
+							
+							bufferObject.addBytes(msg);
+							
+							if(bufferObject.checkMessage()){
+								System.out.println("=====NEW MESSAGE=====");
+								System.out.println(CMSInterface.messageReader(bufferObject.exportMessage()));
+							}
+							else{
+								System.out.println("Message Incomplete.");
+								continue;
+							}
 						}
 						
-						Thread.sleep(1000); //Timer 100ms
+						Thread.sleep(100); //Timer 100ms
 						
 					} catch (InterruptedException e) {
 						e.printStackTrace();

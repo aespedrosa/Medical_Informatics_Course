@@ -31,6 +31,7 @@ public class CMSInterface {
 		System.out.println("\n--End--------");
 		
 		port.writeBytes(message);
+		
 //		Thread.sleep(1000);
 //		byte[] response = port.readBytes();
 //		
@@ -103,7 +104,7 @@ public class CMSInterface {
 		//---Switch bytes 2by2
 		msg = byteSwitcher(msg);
 		
-		//---Search for 1Bh and add FFh
+		//---Search for 1Bh and add FFh //TODO Se tiver + q 1 n funciona
 		if(msg.contains((byte) 0x1B)){
 			msg.add(msg.indexOf((byte) 0x1B)+1, (byte) 0xFF);
 		}
