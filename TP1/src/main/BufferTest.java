@@ -7,16 +7,16 @@ public class BufferTest {
 	private static ArrayList<Byte> buff;
 	private static int beginIndex;
 	private static int endIndex;
+	private static boolean first;
 	
 	public BufferTest(){
 		buff = new ArrayList<Byte>();
+		first = false;
 	}
 		
 	public void addBytes(byte[] array){
-		boolean first = false;
-		
 		for(int i=0;i<array.length;i++){
-			if(array[i] == 0x1B && array[i+1] != 0xFF && !first && i!=array.length-1){ //TODO Fora daqui satanas
+			if(array[i] == 0x1B && array[i+1] != 0xFF && !first && i!=array.length-1){
 				beginIndex = i;
 				System.out.println("Begin defined: " + beginIndex);
 				first = true;
@@ -35,11 +35,22 @@ public class BufferTest {
 		}
 		else{
 			endIndex = beginIndex + comp + 1;
+			
 			for(int ii=beginIndex ; ii<endIndex; ii++){
 				if(buff.get(ii) == 0x1B && buff.get(ii+1)==0xFF){
 					complete = false;
 					break;
 				}			
+			}
+			
+			if(endIndex<buff.size() && !complete){
+				for(int j=endIndex ; j<buff.size()-1 ;j++){
+					if(buff.get(j)==0x1B && buff.get(j+1)!=0xFF){
+						endIndex = j - 1;
+						complete = true;
+						break;
+					}
+				}
 			}
 		}
 
@@ -55,6 +66,7 @@ public class BufferTest {
 		}
 		
 		beginIndex = 0;
+		first = false;
 		return message;
 	}
 	
