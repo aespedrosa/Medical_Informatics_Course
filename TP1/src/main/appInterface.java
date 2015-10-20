@@ -11,6 +11,7 @@ import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Enumeration;
 
 
@@ -208,10 +209,10 @@ public class appInterface extends javax.swing.JFrame {
 				
 				while(true){
 					try {
+						
 						byte[] msg = cominterface.readBytes();
 						
 						if(msg.length!=0){
-							
 							bufferObject.addBytes(msg);
 							
 							if(bufferObject.checkMessage()){
@@ -220,11 +221,11 @@ public class appInterface extends javax.swing.JFrame {
 							}
 							else{
 								System.out.println("Message Incomplete.");
-								continue;
 							}
 						}
 						
-						Thread.sleep(100); //Timer 100ms
+						Thread.sleep(3000); //Timer 100ms
+												
 						
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -235,7 +236,6 @@ public class appInterface extends javax.swing.JFrame {
 		this.thread_read.start();
 	}
 
-	@SuppressWarnings("deprecation")
 	void closeButton_actionPerformed(java.awt.event.ActionEvent event) throws InterruptedException {
 		if (connected)
 			CMSInterface.disconnect(port);

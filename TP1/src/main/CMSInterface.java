@@ -1,5 +1,7 @@
 package main;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 
 /**
@@ -124,12 +126,18 @@ public class CMSInterface {
 		
 		//---Search for 1B (message start) and FF.
 		for(int i=0; i<msg.length;i++){
-			if((msg[i]==0x1B && msg[i+1]!=0xFF) || (msg[i]==0xFF && msg[i-1]==0x1B)){
-				continue;
+			if(i!=msg.length-1){
+				if((msg[i]==0x1B && msg[i+1]!=0xFF) || (msg[i]==0xFF && msg[i-1]==0x1B)){
+					continue;
+				}
+				else{
+					decodedmessage.add(msg[i]);
+				}
 			}
 			else{
 				decodedmessage.add(msg[i]);
 			}
+
 		}
 
 		//---Switch bytes 2by2
@@ -178,7 +186,7 @@ public class CMSInterface {
 			for(int b=11 ; b<finalmsg.size();b++){
 				temp = temp + finalmsg.get(b);
 			}
-			String parlist_rsp = "Actual: " + actual + "Total: " + total + "Msg_ID: " + msg_id + "\nMessage: " + temp;
+			String parlist_rsp = "Actual: " + actual + " Total: " + total + " Msg_ID: " + msg_id + "\nMessage: " + temp;
 		
 			return parlist_rsp;
 		}
@@ -207,8 +215,12 @@ public class CMSInterface {
 	}
 
 	public static int byte2toInt(byte one,byte two){
-		int number = one*256 + two;
-		return number;
+//		int number = Math.abs(one)*256 + Math.abs(two);
+		byte[] coiso = {one,two};
+		ByteBuffer buffer = ByteBuffer.wrap(coiso);
+		buffer.order(ByteOrder.BIG_ENDIAN);  
+		int result = buffer.getShort();
+		return result;
 	}
 
 	public static byte[] toPrimitive(Byte[] array) {
