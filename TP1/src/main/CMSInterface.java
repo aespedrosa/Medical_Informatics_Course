@@ -22,46 +22,29 @@ public class CMSInterface {
 
 		final int cmd = 01;
 
-		int data = 00; //---No Life Tick
+		int[] data = {0}; //---No Life Tick
 
 		byte[] message = messageCreator(dst,src,cmd,data);
 
-		System.out.println("--Message--------");
-		for(byte b : message){
-			System.out.print(b);
-		}
-		System.out.println("\n--End--------");
+//		System.out.println("--Message--------");
+//		for(byte b : message){
+//			System.out.print(b);
+//		}
+//		System.out.println("\n--End--------");
 		
 		port.writeBytes(message);
-		
-//		Thread.sleep(1000);
-//		byte[] response = port.readBytes();
-//		
-//		String rsp_string=messageReader(response);
-//
-//		System.out.println("---Message received---");
-//		System.out.println(rsp_string);
-//		System.out.println("----------------------");
-		
+				
 	}
 
 	public static void disconnect(ComInterface port) throws InterruptedException {
 
 		final int cmd = 07;
 
-		int data = 00; //---Necessary?
+		int[] data = {0};
 
 		byte[] message = messageCreator(dst,src,cmd,data);
 		
 		port.writeBytes(message);
-//		Thread.sleep(1000);
-//		byte[] response = port.readBytes();
-//		
-//		String rsp_string = messageReader(response);
-//
-//		System.out.println("---Message received---");
-//		System.out.println(rsp_string);
-//		System.out.println("----------------------");
 
 	}
 
@@ -69,25 +52,44 @@ public class CMSInterface {
 		
 		final int cmd = 11;
 
-		int data = 00; //---Necessary?
+		int[] data = {0};
 
 		byte[] message = messageCreator(dst,src,cmd,data);
 		
 		port.writeBytes(message);
 	}
 
-	public static void singleTuneRequest(int id) {
-
+	public static void singleTuneRequest(ComInterface port,int id) {
+		
+		final int cmd = 15;
+		int rec_id = 0;
+		
+		int[] data = {id} ;
+				
+		byte[] message = messageCreator(dst,src,cmd,data);
+		
+		port.writeBytes(message);
 	}
 
-	public static byte[] messageCreator(int dst , int src , int cmd , int data) {
+	public static byte[] messageCreator(int dst , int src , int cmd , int[] data) {
 
 		ArrayList<Byte> msg = new ArrayList<Byte>();
 
 		byte[] dst_a = intToByteArray2(dst);
 		byte[] src_a = intToByteArray2(src);
 		byte[] cmd_a = intToByteArray2(cmd);
-		byte[] data_a = intToByteArray2(data);
+		byte[] data_a = new byte[4];
+		
+//		if(data.length==1){ 
+			 data_a= intToByteArray2(data[0]);
+//			 data_a[1]= intToByteArray2(data[0])[1];
+//		}
+//		else{  //SingleTuneCase
+//			byte[] temp = intToByteArray2(data[0]);
+//			data_a[0] = temp[0];
+//			data_a[1] = temp[1];
+//			data_a[3] = (byte)data[2];
+//		}
 
 		msg.add(dst_a[0]);
 		msg.add(dst_a[1]);
@@ -95,9 +97,17 @@ public class CMSInterface {
 		msg.add(src_a[1]);
 		msg.add(cmd_a[0]);
 		msg.add(cmd_a[1]);
-		msg.add(data_a[0]);
-		msg.add(data_a[1]);
-
+//		if(data.length==1){
+			msg.add(data_a[0]);
+			msg.add(data_a[1]);
+//		}
+//		else{  //SingleTuneCase
+//			msg.add(data_a[0]);
+//			msg.add(data_a[1]);
+//			msg.add(data_a[2]);
+//			msg.add(data_a[3]);
+//		}
+		
 		byte[] length_a = intToByteArray2(msg.size()+2);
 		
 		msg.add(0,length_a[0]);
@@ -106,11 +116,13 @@ public class CMSInterface {
 		//---Switch bytes 2by2
 		msg = byteSwitcher(msg);
 		
-		//---Search for 1Bh and add FFh //TODO Se tiver + q 1 n funciona
-		if(msg.contains((byte) 0x1B)){
-			msg.add(msg.indexOf((byte) 0x1B)+1, (byte) 0xFF);
+		//---Search for 1Bh and add FFh
+		for(Byte g : msg){
+			if(g==(byte)0x1B){
+				msg.add(msg.indexOf(g)+1, (byte) 0xFF);
+			}
 		}
-				
+
 		//---Add Marker
 		msg.add(0,(byte) 0x1B);
 		
@@ -181,14 +193,21 @@ public class CMSInterface {
 		else if(cmd==12){ //---ParList Response
 			int actual = finalmsg.get(8);
 			int total = finalmsg.get(9);
-			int msg_id = finalmsg.get(10); //---TODO Pode nao ter so 1 byte
+			int msg_id = byte2toInt(finalmsg.get(10),finalmsg.get(11));
 			String temp = "";
-			for(int b=11 ; b<finalmsg.size();b++){
+			for(int b=12 ; b<finalmsg.size();b++){
 				temp = temp + finalmsg.get(b);
 			}
+			//TODO Convert temp to text
 			String parlist_rsp = "Actual: " + actual + " Total: " + total + " Msg_ID: " + msg_id + "\nMessage: " + temp;
 		
-			return parlist_rsp;
+			return general_string+parlist_rsp;
+		}
+		else if(cmd==16){ //---Single Tune Response
+			int resp = byte2toInt(finalmsg.get(8),finalmsg.get(9));
+			String singletune_rsp = "Single Tune ID: " + resp;
+			
+			return general_string+singletune_rsp;
 		}
 		else{
 			return null;
@@ -215,7 +234,6 @@ public class CMSInterface {
 	}
 
 	public static int byte2toInt(byte one,byte two){
-//		int number = Math.abs(one)*256 + Math.abs(two);
 		byte[] coiso = {one,two};
 		ByteBuffer buffer = ByteBuffer.wrap(coiso);
 		buffer.order(ByteOrder.BIG_ENDIAN);  

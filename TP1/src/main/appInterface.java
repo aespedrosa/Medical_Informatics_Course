@@ -34,7 +34,7 @@ public class appInterface extends javax.swing.JFrame {
 	private Thread thread_read;
 
 	public appInterface() {
-
+		
 		setTitle("JFC Application");
 		setDefaultCloseOperation(javax.swing.JFrame.DO_NOTHING_ON_CLOSE);
 		getContentPane().setLayout(null);
@@ -101,6 +101,8 @@ public class appInterface extends javax.swing.JFrame {
 		getParButton.addActionListener(lSymAction);
 		singleTuneButton.addActionListener(lSymAction);
 		invertCheckBox.addActionListener(lSymAction);
+		
+		textArea.append("Interface Started.\n");
 
 	}
 
@@ -199,13 +201,16 @@ public class appInterface extends javax.swing.JFrame {
 		openButton.setEnabled(false);
 		closeButton.setEnabled(true);
 		connButton.setEnabled(true);
-		
+	
 		ComInterface cominterface = this.port;
+		textArea.append("COM Port Opened: " + port + "\n");
 		
 		//---Thread for Reading COM Buffer
 		this.thread_read = new Thread(new Runnable() {
 			public void run(){
 				BufferTest bufferObject = new BufferTest();
+				int step = 100;
+				textArea.append("Listener Thread Started. Step " + step + "ms.\n");
 				
 				while(true){
 					try {
@@ -216,17 +221,17 @@ public class appInterface extends javax.swing.JFrame {
 							bufferObject.addBytes(msg);
 							
 							if(bufferObject.checkMessage()){
-								System.out.println("=====NEW MESSAGE=====");
-								System.out.println(CMSInterface.messageReader(bufferObject.exportMessage()));
+								textArea.append("-----New Message Received-----\n");
+								textArea.append(CMSInterface.messageReader(bufferObject.exportMessage())  + "\n");
+								textArea.append("-----------------------------\n");
 							}
 							else{
-								System.out.println("Message Incomplete.");
+								textArea.append("!!!---Message Incomplete---!!!\n");
 							}
 						}
 						
-						Thread.sleep(3000); //Timer 100ms
+						Thread.sleep(step); //Timer 100ms
 												
-						
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -240,6 +245,7 @@ public class appInterface extends javax.swing.JFrame {
 		if (connected)
 			CMSInterface.disconnect(port);
 			this.thread_read.stop();
+			textArea.append("COM Port Closed: " + port + "\n");
 		try {
 			Thread.sleep(300);
 		} catch (Exception e) {

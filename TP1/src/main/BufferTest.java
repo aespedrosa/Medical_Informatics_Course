@@ -18,7 +18,7 @@ public class BufferTest {
 	 */	
 	public void findbegin(){
 		for(int i=0;i<buff.size()-1;i++){
-			if(buff.get(i) == 0x1B && buff.get(i+1) != 0xFF){
+			if(buff.get(i) == (byte)0x1B && buff.get(i+1) != (byte)0xFF){
 				beginIndex = i;
 				break;
 			}
@@ -60,7 +60,7 @@ public class BufferTest {
 			endIndex = beginIndex + comp;
 			
 			for(int ii=beginIndex ; ii<endIndex; ii++){
-				if(buff.get(ii) == 27 && buff.get(ii+1)==255){ //If the message contains 1BFF, it might not be complete
+				if(buff.get(ii) == (byte)0x1B && buff.get(ii+1)==(byte)0xFF){ //If the message contains 1BFF, it might not be complete
 					System.out.println("Mensagem nao completa.");
 					complete = false;
 					break;
@@ -69,7 +69,7 @@ public class BufferTest {
 			
 			if(endIndex+1<buff.size() && !complete){ //Check if the buffer has more bytes to read.
 				for(int j=endIndex+1 ; j<buff.size()-1 ;j++){ 
-					if(buff.get(j)==0x1B && buff.get(j+1)!=0xFF){ //If a start 0x1B is found, then the message ends before that.
+					if(buff.get(j)==(byte)0x1B && buff.get(j+1)!=(byte)0xFF){ //If a start 0x1B is found, then the message ends before that.
 						System.out.println("End Index ajustado.");
 						endIndex = j - 1;
 						complete = true;
