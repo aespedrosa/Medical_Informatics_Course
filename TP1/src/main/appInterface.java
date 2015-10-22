@@ -208,8 +208,8 @@ public class appInterface extends javax.swing.JFrame {
 		//---Thread for Reading COM Buffer
 		this.thread_read = new Thread(new Runnable() {
 			public void run(){
-				BufferTest bufferObject = new BufferTest();
-				int step = 100;
+				BufferOne bufferObject = new BufferOne();
+				int step = 100; //Timer ms
 				textArea.append("Listener Thread Started. Step " + step + "ms.\n");
 				
 				while(true){
@@ -225,12 +225,9 @@ public class appInterface extends javax.swing.JFrame {
 								textArea.append(CMSInterface.messageReader(bufferObject.exportMessage())  + "\n");
 								textArea.append("-----------------------------\n");
 							}
-							else{
-								textArea.append("!!!---Message Incomplete---!!!\n");
-							}
 						}
 						
-						Thread.sleep(step); //Timer 100ms
+						Thread.sleep(step); 
 												
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -264,7 +261,9 @@ public class appInterface extends javax.swing.JFrame {
 	void connButton_actionPerformed(java.awt.event.ActionEvent event) throws InterruptedException {
 		disconnButton.setEnabled(true);
 		getParButton.setEnabled(true);
+		singleTuneButton.setEnabled(true);
 		invertCheckBox.setEnabled(true);
+		idTextField.setEnabled(true);
 		CMSInterface.connect(port);
 		connected = true;
 
@@ -292,7 +291,7 @@ public class appInterface extends javax.swing.JFrame {
 
 
 	void singleTuneButton_actionPerformed(java.awt.event.ActionEvent event) {
-
+		CMSInterface.singleTuneRequest(port,Integer.parseInt(idTextField.getText())); 
 	}
 
 	void appendText(String text) {

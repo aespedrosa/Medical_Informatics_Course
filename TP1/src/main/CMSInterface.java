@@ -25,12 +25,6 @@ public class CMSInterface {
 		int[] data = {0}; //---No Life Tick
 
 		byte[] message = messageCreator(dst,src,cmd,data);
-
-//		System.out.println("--Message--------");
-//		for(byte b : message){
-//			System.out.print(b);
-//		}
-//		System.out.println("\n--End--------");
 		
 		port.writeBytes(message);
 				
@@ -62,7 +56,6 @@ public class CMSInterface {
 	public static void singleTuneRequest(ComInterface port,int id) {
 		
 		final int cmd = 15;
-		int rec_id = 0;
 		
 		int[] data = {id} ;
 				
@@ -79,17 +72,8 @@ public class CMSInterface {
 		byte[] src_a = intToByteArray2(src);
 		byte[] cmd_a = intToByteArray2(cmd);
 		byte[] data_a = new byte[4];
-		
-//		if(data.length==1){ 
-			 data_a= intToByteArray2(data[0]);
-//			 data_a[1]= intToByteArray2(data[0])[1];
-//		}
-//		else{  //SingleTuneCase
-//			byte[] temp = intToByteArray2(data[0]);
-//			data_a[0] = temp[0];
-//			data_a[1] = temp[1];
-//			data_a[3] = (byte)data[2];
-//		}
+		 
+		data_a= intToByteArray2(data[0]);
 
 		msg.add(dst_a[0]);
 		msg.add(dst_a[1]);
@@ -97,16 +81,8 @@ public class CMSInterface {
 		msg.add(src_a[1]);
 		msg.add(cmd_a[0]);
 		msg.add(cmd_a[1]);
-//		if(data.length==1){
-			msg.add(data_a[0]);
-			msg.add(data_a[1]);
-//		}
-//		else{  //SingleTuneCase
-//			msg.add(data_a[0]);
-//			msg.add(data_a[1]);
-//			msg.add(data_a[2]);
-//			msg.add(data_a[3]);
-//		}
+		msg.add(data_a[0]);
+		msg.add(data_a[1]);
 		
 		byte[] length_a = intToByteArray2(msg.size()+2);
 		
@@ -193,13 +169,29 @@ public class CMSInterface {
 		else if(cmd==12){ //---ParList Response
 			int actual = finalmsg.get(8);
 			int total = finalmsg.get(9);
-			int msg_id = byte2toInt(finalmsg.get(10),finalmsg.get(11));
-			String temp = "";
-			for(int b=12 ; b<finalmsg.size();b++){
-				temp = temp + finalmsg.get(b);
+			
+			String format = "|%1$-8s|%2$-8s|%3$-10s|%4$-8s|%5$-8s|%6$-8s|%7$-8s|%8$-10s|\n";
+			String text = String.format(format, "Src ID","Ch ID","Msg Type","Ch N","Src N","Unused","Layer","Ch Name");
+			
+			int [] num = new int[16];
+			int b = 10;
+			while(b<finalmsg.size()){
+				int source_id = byte2toInt(finalmsg.get(b),finalmsg.get(b+1));
+				int channel_id = byte2toInt(finalmsg.get(b+2),finalmsg.get(b+3));
+				int msg_type = byte2toInt(finalmsg.get(b+4),finalmsg.get(b+5));
+				int channel_num = byte2toInt((byte) 0,finalmsg.get(b+6));
+				int source_num = byte2toInt((byte) 0,finalmsg.get(b+7));
+				int unused = byte2toInt((byte) 0,finalmsg.get(b+8));
+				int layer = byte2toInt((byte) 0,finalmsg.get(b+9));
+				for(int j = 0; j<16 ; j++){
+					num[j] = byte2toInt((byte) 0,finalmsg.get(b+10+j));
+				}
+				
+				text = text + String.format(format, source_id,channel_id,msg_type,channel_num,source_num,unused,layer,AsciiConversions.c16_to_c8(num));
+				b+=26;
 			}
-			//TODO Convert temp to text
-			String parlist_rsp = "Actual: " + actual + " Total: " + total + " Msg_ID: " + msg_id + "\nMessage: " + temp;
+			
+			String parlist_rsp = "Actual: " + actual + " Total: " + total + "\n" + text;
 		
 			return general_string+parlist_rsp;
 		}
@@ -217,8 +209,8 @@ public class CMSInterface {
 	public static ArrayList<Byte> byteSwitcher(ArrayList<Byte> msg){
 		int i=0;
 		while(i<msg.size()){
-			byte temp = msg.get(i);
-			byte temp2 = msg.get(i+1);
+			byte temp = (byte) msg.get(i);
+			byte temp2 = (byte )msg.get(i+1);
 			msg.set(i, temp2);
 			msg.set(i+1, temp);
 			i = i+2;

@@ -70,8 +70,6 @@ public class ComInterface {
 				}
 			}
 		}
-
-
 	}
 
 	/**
@@ -92,7 +90,6 @@ public class ComInterface {
 	 */
 
 	public void writeBytes(byte[] data) {
-
 		try {
 			outputStream.write(data);
 			outputStream.flush();
