@@ -31,8 +31,6 @@ public class ComInterface {
 	 * Creates a new connection to a specific port.
 	 * @param port The port to connect
 	 */
-
-
 	public ComInterface(String port) {
 		portList = CommPortIdentifier.getPortIdentifiers();
 		while (portList.hasMoreElements()) {
@@ -115,7 +113,6 @@ public class ComInterface {
 
 		return readBuffer;
 	}
-
 
 	/**
 	 * Number of bytes available to read from this port

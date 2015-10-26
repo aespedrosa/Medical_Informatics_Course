@@ -48,34 +48,43 @@ public class BufferTwo {
 
 		boolean complete = true;
 
-		int comp = CMSInterface.byte2toInt(buff[beginIndex+2], buff[beginIndex+1]);
+		int comp = CMSInterface.byte2toInt(buff[(beginIndex+2)%sizeBuffer], buff[(beginIndex+1)%sizeBuffer]);
 
 		if(((writeIndex+sizeBuffer-beginIndex)%sizeBuffer) < comp+1){
 			complete = false;
+			System.out.println("Nao chega o comprimento");
 		}
 		else{
 			endIndex = beginIndex + comp; //endIndex e "virtual"
-
+			
+			int ff_contagem=0;
 			for(int ii=beginIndex ; ii<endIndex; ii++){
-				int ii_real = ii % sizeBuffer;
-				if(buff[ii_real] == (byte)0x1B && buff[ii_real+1]==(byte)0xFF){ //If the message contains 1BFF, it might not be complete
+				if(buff[ii% sizeBuffer] == (byte)0x1B && buff[(ii+1)% sizeBuffer]==(byte)0xFF){ //If the message contains 1BFF, it might not be complete
+					System.out.println("Existe FF");
 					complete = false;
-					break;
+					//break;
+					ff_contagem+=1;
 				}			
 			}
 
-			if((writeIndex+sizeBuffer-endIndex)%sizeBuffer > 0 && !complete){ //Check if the buffer has more bytes to read.
-				for(int j=endIndex+1 ; j<(writeIndex+sizeBuffer-endIndex)%sizeBuffer-1 ;j++){ 
-					int j_real = j % sizeBuffer;
-					if(buff[j_real]==(byte)0x1B && buff[j_real+1]!=(byte)0xFF){ //If a start 0x1B is found, then the message ends before that.
-						endIndex = j_real - 1 + sizeBuffer;
-						complete = true;
-						break;
-					}
-				}
+			if((ff_contagem+comp+1)>(endIndex-beginIndex) && !complete){
+				endIndex=endIndex+ff_contagem;
+				complete=true;
 			}
+			
+//			if((writeIndex-endIndex) > 0 && !complete){ //Check if the buffer has more bytes to read.
+//				System.out.println("Tem mais bytes.");
+//				for(int j=endIndex+1 ; j<writeIndex ;j++){ 
+//					if(buff[j % sizeBuffer]==(byte)0x1B && buff[(j+1) % sizeBuffer]!=(byte)0xFF){ //If a start 0x1B is found, then the message ends before that.
+//						System.out.println("Encontrei outro 27.");
+//						endIndex=j-1;
+//						complete = true;
+//						break;
+//					}
+//				}
+//			}
 		}
-
+		System.out.println("B: " + beginIndex + " E: " + endIndex + " W: " + writeIndex);
 		return complete;
 	}
 
@@ -92,13 +101,15 @@ public class BufferTwo {
 	 * @return byte[] message
 	 */
 	public byte[] exportMessage(){
-		byte[] message = new byte[ endIndex + 1 - beginIndex];
+		byte[] message = new byte[endIndex + 1 - beginIndex];
 				
 		for(int ii=beginIndex; ii<=endIndex;ii++){
 			message[ii-beginIndex] = buff[ii%sizeBuffer];
 		}
 		
-		beginIndex = endIndex+1;
+		beginIndex = (endIndex+1) % sizeBuffer;
+		endIndex = endIndex % sizeBuffer;
+		writeIndex = writeIndex % sizeBuffer;
 		
 		return message;
 	}

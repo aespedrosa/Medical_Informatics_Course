@@ -25,9 +25,9 @@ public class balele {
 		
 		BufferTwo buffer = new BufferTwo(30);
 		int k = 0;
-		while(k<10){
-			int[] data = {0};
-			byte[] msg = CMSInterface.messageCreator(34231 , 11 , 8 , data);
+		while(k<11){
+			int[] data = {27};
+			byte[] msg = CMSInterface.messageCreator(23412, 11 , 8 , data);
 			
 			buffer.addBytes(msg);
 			for(int b=0; b<buffer.getBuff().length ;b++){
@@ -44,6 +44,7 @@ public class balele {
 				}
 				System.out.println();
 				System.out.println(CMSInterface.messageReader(finalmsg)  + "\n");
+				System.out.println("iter:------------------------>"+k);
 			}
 			Thread.sleep(100);
 			k+=1;			

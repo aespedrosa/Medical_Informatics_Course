@@ -91,11 +91,11 @@ public class CMSInterface {
 		
 		//---Switch bytes 2by2
 		msg = byteSwitcher(msg);
-		
+
 		//---Search for 1Bh and add FFh
-		for(Byte g : msg){
-			if(g==(byte)0x1B){
-				msg.add(msg.indexOf(g)+1, (byte) 0xFF);
+		for(int j=0 ; j<msg.size() ; j++){
+			if(msg.get(j)==(byte)0x1B){
+				msg.add(j+1, (byte) 0xFF);
 			}
 		}
 
