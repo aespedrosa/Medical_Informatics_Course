@@ -254,16 +254,17 @@ public class appInterface extends javax.swing.JFrame {
 		connButton.setEnabled(false);
 		disconnButton.setEnabled(false);
 		getParButton.setEnabled(false);
-
+		singleTuneButton.setEnabled(false);
+		idTextField.setEnabled(false);
 
 	}
 
 	void connButton_actionPerformed(java.awt.event.ActionEvent event) throws InterruptedException {
 		disconnButton.setEnabled(true);
 		getParButton.setEnabled(true);
-		singleTuneButton.setEnabled(true);
 		invertCheckBox.setEnabled(true);
-		idTextField.setEnabled(true);
+		singleTuneButton.setEnabled(false);
+		idTextField.setEnabled(false);
 		CMSInterface.connect(port);
 		connected = true;
 
@@ -284,8 +285,8 @@ public class appInterface extends javax.swing.JFrame {
 
 	void getParButton_actionPerformed(java.awt.event.ActionEvent event) throws InterruptedException {
 		CMSInterface.getParList(port);
-		singleTuneButton.setEnabled(false);
-		idTextField.setEnabled(false);
+		singleTuneButton.setEnabled(true);
+		idTextField.setEnabled(true);
 
 	}
 
