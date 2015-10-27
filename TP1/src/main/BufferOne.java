@@ -9,7 +9,7 @@ public class BufferOne {
 	private static int endIndex;
 	
 	public BufferOne(){
-		buff = new ArrayList<Byte>(50);
+		buff = new ArrayList<Byte>();
 	}
 	
 	/**

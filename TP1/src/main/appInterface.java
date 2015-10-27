@@ -2,20 +2,20 @@ package main;
 /**
  * Simple program to open communications ports and connect to Agilent Monitor
  * Graphical User Interface
- * @version 1.2 - 30 Set 2003
+ * @version 1 - 29 Oct 2015
  * @author Francisco Cardoso (fmcc@student.dei.uc.pt)
  * @author Ricardo Sal (ricsal@student.dei.uc.pt)
+ * @author Alexandre Sayal (uc2011149504@student.uc.pt)
+ * @author André Pedrosa (uc2011159905@student.uc.pt)
  */
 
 import gnu.io.CommPortIdentifier;
-import gnu.io.SerialPort;
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Enumeration;
 
-
 public class appInterface extends javax.swing.JFrame {
+	private static final long serialVersionUID = 1L;
 	private ComInterface port;
 	private boolean connected = false;
 	private JTextArea textArea = new javax.swing.JTextArea();
@@ -24,7 +24,7 @@ public class appInterface extends javax.swing.JFrame {
 	private JButton getParButton = new javax.swing.JButton();
 	private JButton closeButton = new javax.swing.JButton();
 	private JButton connButton = new javax.swing.JButton();
-	private JComboBox portComboBox = new javax.swing.JComboBox();
+	private JComboBox<String> portComboBox = new javax.swing.JComboBox<String>();
 	private JLabel portLabel = new javax.swing.JLabel();
 	private JScrollPane scrollPane = new javax.swing.JScrollPane();
 	private JButton singleTuneButton = new javax.swing.JButton();
@@ -67,7 +67,7 @@ public class appInterface extends javax.swing.JFrame {
 		getContentPane().add(portComboBox);
 		portComboBox.setBounds(725, 456, 69, 25);
 
-		Enumeration portList = Utils.getPorts();
+		Enumeration<?> portList = Utils.getPorts();
 
 		while (portList.hasMoreElements()) {
 			CommPortIdentifier portId = (CommPortIdentifier) portList.nextElement();
@@ -185,13 +185,10 @@ public class appInterface extends javax.swing.JFrame {
 				try {
 					getParButton_actionPerformed(event);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			if (object == singleTuneButton)
 				singleTuneButton_actionPerformed(event);
-
-
 		}
 	}
 
@@ -208,7 +205,7 @@ public class appInterface extends javax.swing.JFrame {
 		//---Thread for Reading COM Buffer
 		this.thread_read = new Thread(new Runnable() {
 			public void run(){
-				BufferOne bufferObject = new BufferOne();
+				BufferTwo bufferObject = new BufferTwo(1500);
 				int step = 100; //Timer ms
 				textArea.append("Listener Thread Started. Step " + step + "ms.\n");
 				
@@ -222,8 +219,8 @@ public class appInterface extends javax.swing.JFrame {
 							
 							if(bufferObject.checkMessage()){
 								textArea.append("-----New Message Received-----\n");
-								textArea.append(CMSInterface.messageReader(bufferObject.exportMessage())  + "\n");
-								textArea.append("-----------------------------\n");
+								textArea.append(Utils.messageReader(bufferObject.exportMessage())  + "\n");
+								textArea.append("------------------------------\n");
 							}
 						}
 						
@@ -238,6 +235,7 @@ public class appInterface extends javax.swing.JFrame {
 		this.thread_read.start();
 	}
 
+	@SuppressWarnings("deprecation")
 	void closeButton_actionPerformed(java.awt.event.ActionEvent event) throws InterruptedException {
 		if (connected)
 			CMSInterface.disconnect(port);
@@ -282,14 +280,12 @@ public class appInterface extends javax.swing.JFrame {
 
 	}
 
-
 	void getParButton_actionPerformed(java.awt.event.ActionEvent event) throws InterruptedException {
 		CMSInterface.getParList(port);
 		singleTuneButton.setEnabled(true);
 		idTextField.setEnabled(true);
 
 	}
-
 
 	void singleTuneButton_actionPerformed(java.awt.event.ActionEvent event) {
 		CMSInterface.singleTuneRequest(port,Integer.parseInt(idTextField.getText())); 
@@ -298,6 +294,4 @@ public class appInterface extends javax.swing.JFrame {
 	void appendText(String text) {
 		textArea.append(text);
 	}
-
-
 }

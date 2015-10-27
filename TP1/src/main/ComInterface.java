@@ -19,13 +19,13 @@ import java.util.Enumeration;
 
 public class ComInterface {
 
-	private Enumeration portList;
+	private Enumeration<?> portList;
 	private static CommPortIdentifier portId;
 	private static SerialPort serialPort;
 	private static OutputStream outputStream;
 	private InputStream inputStream;
 	private BufferedInputStream buffer;
-	private final int MAXBYTES = 10000; // Maximum number of bytes read from COM port each time
+//	private final int MAXBYTES = 10000; // Maximum number of bytes read from COM port each time
 
 	/**
 	 * Creates a new connection to a specific port.

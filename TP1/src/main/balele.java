@@ -26,7 +26,7 @@ public class balele {
 		BufferTwo buffer = new BufferTwo(30);
 		int k = 0;
 		while(k<11){
-			int[] data = {27};
+			int data = 27;
 			byte[] msg = CMSInterface.messageCreator(23412, 11 , 8 , data);
 			
 			buffer.addBytes(msg);
