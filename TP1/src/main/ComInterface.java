@@ -1,12 +1,4 @@
 package main;
-/**
- * Simple program to open communications ports and connect to Agilent Monitor
- * Communications Port Interface
- * @version 1.2 - 30 Set 2003
- * @author Francisco Cardoso (fmcc@student.dei.uc.pt)
- * @author Ricardo Sal (ricsal@student.dei.uc.pt)
- */
-
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.PortInUseException;
@@ -17,6 +9,13 @@ import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.Enumeration;
 
+/**
+ * Simple program to open communications ports and connect to Agilent Monitor
+ * Communications Port Interface
+ * @version 1.2 - 30 Set 2003
+ * @author Francisco Cardoso (fmcc@student.dei.uc.pt)
+ * @author Ricardo Sal (ricsal@student.dei.uc.pt)
+ */
 public class ComInterface {
 
 	private Enumeration<?> portList;

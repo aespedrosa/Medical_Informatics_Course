@@ -6,7 +6,7 @@ package main;
  * @author Alexandre Sayal (uc2011149504@student.uc.pt)
  * @author André Pedrosa (uc2011159905@student.uc.pt)
  */
-public class BufferTwo {
+public class BufferCircular {
 
 	private static byte[] buff;
 	private static int sizeBuffer;
@@ -14,7 +14,7 @@ public class BufferTwo {
 	private static int endIndex;
 	private static int writeIndex;
 
-	public BufferTwo(int size) {
+	public BufferCircular(int size) {
 		sizeBuffer = size;
 		buff = new byte[size];
 		beginIndex = 0;
@@ -42,7 +42,7 @@ public class BufferTwo {
 		boolean complete = true;
 
 		int comp = Utils.byte2toInt(buff[(beginIndex+2)%sizeBuffer], buff[(beginIndex+1)%sizeBuffer]);
-
+		
 		if((writeIndex-beginIndex) < comp+1){
 			complete = false;
 		}
@@ -83,7 +83,7 @@ public class BufferTwo {
 	}
 
 	public static void setBuff(byte[] buff) {
-		BufferTwo.buff = buff;
+		BufferCircular.buff = buff;
 	}
 
 	/**

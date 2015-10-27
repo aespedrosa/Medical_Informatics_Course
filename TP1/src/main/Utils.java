@@ -1,4 +1,9 @@
 package main;
+
+import gnu.io.CommPortIdentifier;
+import java.util.ArrayList;
+import java.util.Enumeration;
+
 /**
  * Simple program to open communications ports and connect to Agilent Monitor
  * Several useful values and methods
@@ -8,13 +13,6 @@ package main;
  * @author Alexandre Sayal (uc2011149504@student.uc.pt)
  * @author André Pedrosa (uc2011159905@student.uc.pt)
  */
-
-import gnu.io.CommPortIdentifier;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.Enumeration;
-
 public class Utils {
 	static final int TYP_SPI_WS = 3;
 	static final int TYP_SPI_CW = 2;
@@ -39,6 +37,14 @@ public class Utils {
 		return portList;
 	}
 	
+	/**
+	 * Create message following the MECIF protocol.
+	 * @param dst Destination ID
+	 * @param src Source ID
+	 * @param cmd Command Type
+	 * @param data
+	 * @return byte[] message
+	 */
 	public static byte[] messageCreator(int dst , int src , int cmd , int data) {
 
 		ArrayList<Byte> msg = new ArrayList<Byte>();
@@ -78,6 +84,11 @@ public class Utils {
 		return Utils.toPrimitive(finalmsg);
 	}
 	
+	/**
+	 * Read message following MECIF protocol.
+	 * @param msg Received message.
+	 * @return String
+	 */
 	public static String messageReader(byte[] msg){
 		ArrayList <Byte> decodedmessage=new ArrayList<Byte>();
 		
@@ -106,6 +117,12 @@ public class Utils {
 		return printmessage(cmd,decodedmessage);
 	}
 
+	/**
+	 * Message formatter.
+	 * @param cmd Command Type
+	 * @param finalmsg Message
+	 * @return String
+	 */
 	public static String printmessage(int cmd, ArrayList<Byte> finalmsg){
 		int comp = Utils.byte2toInt(finalmsg.get(0),finalmsg.get(1));
 		int dst_id = Utils.byte2toInt(finalmsg.get(2),finalmsg.get(3));
@@ -172,6 +189,11 @@ public class Utils {
 		}
 	}
 	
+	/**
+	 * Byte Switcher (2by2).
+	 * @param msg
+	 * @return ArrayList<Byte>
+	 */
 	public static ArrayList<Byte> byteSwitcher(ArrayList<Byte> msg){
 		int i=0;
 		while(i<msg.size()){
@@ -184,6 +206,11 @@ public class Utils {
 		return msg;
 	}
 	
+	/**
+	 * Add escape sequence to message.
+	 * @param msg
+	 * @return ArrayList<Byte>
+	 */
 	public static ArrayList<Byte> addEscape(ArrayList<Byte> msg){
 		for(int j=0 ; j<msg.size() ; j++){
 			if(msg.get(j)==(byte)0x1B){
@@ -193,6 +220,11 @@ public class Utils {
 		return msg;
 	}
 	
+	/**
+	 * Convert Integer to a byte array of length 2.
+	 * @param value Iteger
+	 * @return byte[]
+	 */
 	public static byte[] intToByteArray2(int value){
 		byte[] array = new byte[2];
 		array[0] = (byte) (value/256);
@@ -200,13 +232,28 @@ public class Utils {
 		return array;
 	}
 
+	/**
+	 * Convert two bytes to Integer.
+	 * @param one byte
+	 * @param two byte
+	 * @return Integer
+	 */
 	public static int byte2toInt(byte one,byte two){
-		byte[] aux = {one,two};
-		ByteBuffer buffer = ByteBuffer.wrap(aux);
-		buffer.order(ByteOrder.BIG_ENDIAN);  
-		return buffer.getShort();
+		int a=one;
+		int b=two;
+		if(a<0)
+			a=one+256;
+		if(b<0)
+			b=two+256;
+		
+		return a*256+b;
 	}
 
+	/**
+	 * Convert Byte[] to byte[].
+	 * @param array
+	 * @return byte[]
+	 */
 	public static byte[] toPrimitive(Byte[] array) {
 		byte[] primitive = new byte[array.length];
 		for (int i = 0; i < array.length; i++) {
@@ -214,8 +261,4 @@ public class Utils {
 		}
 		return primitive;
 	}
-	
-	
-	
-
 }

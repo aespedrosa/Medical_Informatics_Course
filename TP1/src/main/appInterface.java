@@ -1,4 +1,10 @@
 package main;
+
+import gnu.io.CommPortIdentifier;
+import javax.swing.*;
+import java.awt.*;
+import java.util.Enumeration;
+
 /**
  * Simple program to open communications ports and connect to Agilent Monitor
  * Graphical User Interface
@@ -8,11 +14,6 @@ package main;
  * @author Alexandre Sayal (uc2011149504@student.uc.pt)
  * @author André Pedrosa (uc2011159905@student.uc.pt)
  */
-
-import gnu.io.CommPortIdentifier;
-import javax.swing.*;
-import java.awt.*;
-import java.util.Enumeration;
 
 public class appInterface extends javax.swing.JFrame {
 	private static final long serialVersionUID = 1L;
@@ -205,7 +206,7 @@ public class appInterface extends javax.swing.JFrame {
 		//---Thread for Reading COM Buffer
 		this.thread_read = new Thread(new Runnable() {
 			public void run(){
-				BufferTwo bufferObject = new BufferTwo(1500);
+				BufferCircular buffer = new BufferCircular(1500);
 				int step = 100; //Timer ms
 				textArea.append("Listener Thread Started. Step " + step + "ms.\n");
 				
@@ -213,13 +214,14 @@ public class appInterface extends javax.swing.JFrame {
 					try {
 						
 						byte[] msg = cominterface.readBytes();
-						
+
 						if(msg.length!=0){
-							bufferObject.addBytes(msg);
+
+							buffer.addBytes(msg);
 							
-							if(bufferObject.checkMessage()){
+							if(buffer.checkMessage()){
 								textArea.append("-----New Message Received-----\n");
-								textArea.append(Utils.messageReader(bufferObject.exportMessage())  + "\n");
+								textArea.append(Utils.messageReader(buffer.exportMessage())  + "\n");
 								textArea.append("------------------------------\n");
 							}
 						}
