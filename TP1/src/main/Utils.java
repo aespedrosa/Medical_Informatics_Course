@@ -222,7 +222,7 @@ public class Utils {
 	
 	/**
 	 * Convert Integer to a byte array of length 2.
-	 * @param value Iteger
+	 * @param value Integer
 	 * @return byte[]
 	 */
 	public static byte[] intToByteArray2(int value){
