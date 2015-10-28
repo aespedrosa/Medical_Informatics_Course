@@ -180,7 +180,11 @@ public class Utils {
 		}
 		else if(cmd==16){ //---Single Tune Response
 			int resp = Utils.byte2toInt(finalmsg.get(8),finalmsg.get(9));
-			String singletune_rsp = "Single Tune ID: " + resp;
+			String data_tune = "";
+			for(int i=10 ; i<finalmsg.size() ; i++){
+				data_tune = data_tune + "," + finalmsg.get(i);
+			}
+			String singletune_rsp = "Single Tune ID: " + resp + "\n" + data_tune;
 			
 			return general_string+singletune_rsp;
 		}
