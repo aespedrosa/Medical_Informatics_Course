@@ -35,9 +35,12 @@ public class ThreadRead {
 							buffer.addBytes(msg);
 							
 							if(buffer.checkMessage()){
-								textArea.append("-----New Message Received-----\n");
-								textArea.append(Utils.messageReader(buffer.exportMessage())  + "\n");
-								textArea.append("------------------------------\n");
+//								textArea.append("-----New Message Received-----\n");
+//								textArea.append(Utils.messageReader(buffer.exportMessage())  + "\n");
+//								textArea.append("------------------------------\n");
+								System.out.println("-----New Message Received-----\n");
+								System.out.println(Utils.messageReader(buffer.exportMessage())  + "\n");
+								System.out.println("------------------------------\n");
 							}
 						}
 						
@@ -59,5 +62,4 @@ public class ThreadRead {
 	public void stopThreadRead(){
 		this.thread_read.stop();
 	}
-
 }

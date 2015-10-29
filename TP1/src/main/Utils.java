@@ -60,8 +60,31 @@ public class Utils {
 		msg.add(src_a[1]);
 		msg.add(cmd_a[0]);
 		msg.add(cmd_a[1]);
-		msg.add(data_a[0]);
-		msg.add(data_a[1]);
+		
+		if(cmd==15){
+			int selectedChannel = 0;
+			
+			msg.add(src_a[0]);
+			msg.add(src_a[1]);
+			
+			if(data>0 && data<appInterface.getChannelList().size())
+				selectedChannel = data;
+			
+			byte[] temp = appInterface.getChannelList().get(selectedChannel).returnMsgID();
+			
+			for(int i=0 ; i<temp.length ; i++){
+				msg.add(temp[i]);
+			}
+			
+			msg.add((byte) 0); //--- MpbHd
+			msg.add((byte) 0); //--- MpbHd
+			msg.add((byte) 0); //--- Rec_Id
+			msg.add((byte) 0); //--- Rec_Id
+		}
+		else{
+			msg.add(data_a[0]);
+			msg.add(data_a[1]);
+		}
 		
 		byte[] length_a = Utils.intToByteArray2(msg.size()+2);
 		
@@ -128,10 +151,11 @@ public class Utils {
 		int dst_id = Utils.byte2toInt(finalmsg.get(2),finalmsg.get(3));
 		int src_id = Utils.byte2toInt(finalmsg.get(4),finalmsg.get(5));
 		
-		String general_string = "Command: " + cmd + " Destination ID: " + dst_id + " Source ID: "
+		String general_string = " Destination ID: " + dst_id + " Source ID: "
 									+ src_id + " Length: " + comp + "\n";
 		
 		if(cmd==2){ //---Connect Response
+			general_string = "Command: " + cmd + general_string;
 			int window_size = Utils.byte2toInt(finalmsg.get(8),finalmsg.get(9));
 			int compat_high = finalmsg.get(10);
 			int compat_low = finalmsg.get(11);
@@ -144,12 +168,14 @@ public class Utils {
 			return general_string+connect_rsp;
 		}
 		else if(cmd==8){ //---Disconnect Response
+			general_string = "Command: " + cmd + general_string;
 			int resp = Utils.byte2toInt(finalmsg.get(8),finalmsg.get(9));
 			String disconnect_rsp = "Disconnect Response: " + resp;
 			
 			return general_string+disconnect_rsp;
 		}
 		else if(cmd==12){ //---ParList Response
+			general_string = "Command: " + cmd + general_string;
 			int actual = finalmsg.get(8);
 			int total = finalmsg.get(9);
 			
@@ -167,11 +193,15 @@ public class Utils {
 				int source_num = Utils.byte2toInt((byte) 0,finalmsg.get(b+7));
 				int unused = Utils.byte2toInt((byte) 0,finalmsg.get(b+8));
 				int layer = Utils.byte2toInt((byte) 0,finalmsg.get(b+9));
+				
 				for(int j = 0; j<16 ; j++){
 					num[j] = Utils.byte2toInt((byte) 0,finalmsg.get(b+10+j));
 				}
+				Channel temp = new Channel(source_id,channel_id,msg_type,channel_num,source_num,unused,layer,AsciiConversions.c16_to_c8(num));
 				
-				text = text + String.format(format, source_id,channel_id,msg_type,channel_num,source_num,unused,layer,AsciiConversions.c16_to_c8(num));
+				appInterface.getChannelList().add(temp);
+				
+				text = text + temp.formatedString();
 				b+=26;
 			}
 			
@@ -180,17 +210,35 @@ public class Utils {
 			return general_string+parlist_rsp;
 		}
 		else if(cmd==16){ //---Single Tune Response
-			int resp = Utils.byte2toInt(finalmsg.get(8),finalmsg.get(9));
-			String data_tune = "";
-			for(int i=10 ; i<finalmsg.size() ; i++){
-				data_tune = data_tune + "," + finalmsg.get(i);
+			general_string = "Command: " + cmd + general_string;
+			int tune_id = Utils.byte2toInt(finalmsg.get(8),finalmsg.get(9));
+			String data_tune = "\nMsg_ID: ";
+			for(int i=10 ; i<20 ; i++){
+				data_tune = data_tune + finalmsg.get(i) + ",";
 			}
-			String singletune_rsp = "Single Tune ID: " + resp + "\n" + data_tune;
-			
+			int mpbhd = Utils.byte2toInt(finalmsg.get(20),finalmsg.get(21));
+			int rec_id = Utils.byte2toInt(finalmsg.get(22),finalmsg.get(23));
+
+			String singletune_rsp = "Single Tune ID: \nTune ID:" + tune_id + data_tune + "\nMPB: "
+						+ mpbhd + "\nRec_Id: " + rec_id;
+
 			return general_string+singletune_rsp;
 		}
-		else{
-			return "Error: Command not known.";
+		else{ //---Single Tune DATA
+			int mpbhd = Utils.byte2toInt(finalmsg.get(8),finalmsg.get(9));
+			int rec_size = finalmsg.get(10);
+			if(rec_size<0)
+				rec_size = rec_size + 256;
+			int mpb_len = finalmsg.get(11);
+			String mpb_data = "";
+			for(int i=12; i<finalmsg.size() ; i++){
+				mpb_data = mpb_data + finalmsg.get(i) + ",";
+			}
+			
+			String singletune_data = "Single Tune DATA\nMpbHd: " + mpbhd + "\nRecSize: " + rec_size + "\nMpbLength: "
+					+ mpb_len + "\nDATA: " + mpb_data;
+			
+			return general_string+singletune_data;
 		}
 	}
 	

@@ -3,6 +3,7 @@ package main;
 import gnu.io.CommPortIdentifier;
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Enumeration;
 
 /**
@@ -33,6 +34,7 @@ public class appInterface extends javax.swing.JFrame {
 	private JTextField idTextField = new javax.swing.JTextField();
 	private JLabel idLabel = new javax.swing.JLabel();
 	private ThreadRead ThreadObject;
+	private static ArrayList<Channel> ChannelList;
 
 	public appInterface() {
 		
@@ -206,6 +208,9 @@ public class appInterface extends javax.swing.JFrame {
 		//---Thread for Reading COM Buffer
 		ThreadObject = new ThreadRead(textArea,cominterface);
 		ThreadObject.startThreadRead();
+		
+		//---Initiate ArrayList for Channels List
+		ChannelList = new ArrayList<Channel>();
 	}
 
 	void closeButton_actionPerformed(java.awt.event.ActionEvent event) throws InterruptedException {
@@ -266,4 +271,9 @@ public class appInterface extends javax.swing.JFrame {
 	void appendText(String text) {
 		textArea.append(text);
 	}
+
+	public static ArrayList<Channel> getChannelList() {
+		return ChannelList;
+	}
+
 }

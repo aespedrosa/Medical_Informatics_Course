@@ -49,30 +49,17 @@ public class BufferCircular {
 		else{
 			endIndex = beginIndex + comp; 
 			
-//			int ff_contagem=0;
+			int ff_contagem=0;
 			for(int ii=beginIndex ; ii<endIndex; ii++){
 				if(buff[ii% sizeBuffer] == (byte)0x1B && buff[(ii+1)% sizeBuffer]==(byte)0xFF){ //If the message contains 1BFF, it might not be complete
 					complete = false;
-					break;
-//					ff_contagem+=1;
+					ff_contagem+=1;
 				}			
 			}
 			
-//			if((ff_contagem+comp+1)>(endIndex-beginIndex) && !complete){
-//				System.out.println("1: " + (ff_contagem+comp+1));
-//				System.out.println("2: " + (endIndex-beginIndex));
-//				endIndex=endIndex+ff_contagem;
-//				complete=true;
-//			}
-			
-			if((writeIndex-endIndex) > 0 && !complete){ //Check if the buffer has more bytes to read.
-				for(int j=endIndex+1 ; j<writeIndex ;j++){ 
-					if(buff[j % sizeBuffer]==(byte)0x1B && buff[(j+1) % sizeBuffer]!=(byte)0xFF){ //If a start 0x1B is found, then the message ends before that.
-						endIndex=j-1;
-						complete = true;
-						break;
-					}
-				}
+			if((ff_contagem+comp+1)>(endIndex-beginIndex) && !complete){
+				endIndex=endIndex+ff_contagem;
+				complete=true;
 			}
 		}
 		return complete;

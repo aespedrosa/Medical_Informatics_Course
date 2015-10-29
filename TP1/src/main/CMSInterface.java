@@ -50,7 +50,7 @@ public class CMSInterface {
 		
 		final int cmd = 15;
 		
-		int data = id ;
+		int data = id;
 				
 		byte[] message = Utils.messageCreator(dst,src,cmd,data);
 		
