@@ -62,10 +62,6 @@ public class Utils {
 		msg.add(cmd_a[1]);
 		msg.add(data_a[0]);
 		msg.add(data_a[1]);
-		if(cmd==15){
-			msg.add((byte)0);
-			msg.add((byte)245);
-		}
 		
 		byte[] length_a = Utils.intToByteArray2(msg.size()+2);
 		
