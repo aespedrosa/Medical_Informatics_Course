@@ -2,6 +2,13 @@ package main;
 
 import javax.swing.JTextArea;
 
+/**
+ * Simple program to open communications ports and connect to Agilent Monitor
+ * Reader Thread
+ * @version 1 - 29 Oct 2015
+ * @author Alexandre Sayal (uc2011149504@student.uc.pt)
+ * @author André Pedrosa (uc2011159905@student.uc.pt)
+ */
 public class ThreadRead {
 	
 	private Thread thread_read;
