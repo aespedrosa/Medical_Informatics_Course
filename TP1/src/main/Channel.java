@@ -29,6 +29,10 @@ public class Channel {
 		this.channel_name = channel_name;
 	}
 	
+	/**
+	 * Generate the MsgId segment.
+	 * @return byte[] msg_id
+	 */
 	public byte[] returnMsgID(){
 		byte[] msgid = new byte[10];
 		byte[] temp1 = Utils.intToByteArray2(this.source_id);
@@ -48,6 +52,10 @@ public class Channel {
 		return msgid;
 	}
 	
+	/**
+	 * Generate the formated string with channel information.
+	 * @return String
+	 */
 	public String formatedString(){
 		String format = "|%1$-10s|%2$-10s|%3$-10s|%4$-8s|%5$-8s|%6$-8s|%7$-8s|%8$-10s|\n";
 		
