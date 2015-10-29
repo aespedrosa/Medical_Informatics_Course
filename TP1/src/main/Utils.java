@@ -62,6 +62,10 @@ public class Utils {
 		msg.add(cmd_a[1]);
 		msg.add(data_a[0]);
 		msg.add(data_a[1]);
+		if(cmd==15){
+			msg.add((byte)0);
+			msg.add((byte)245);
+		}
 		
 		byte[] length_a = Utils.intToByteArray2(msg.size()+2);
 		
@@ -158,7 +162,8 @@ public class Utils {
 			
 			int [] num = new int[16];
 			int b = 10;
-			while(b<finalmsg.size()){
+
+			while(b<finalmsg.size()){				
 				int source_id = Utils.byte2toInt(finalmsg.get(b),finalmsg.get(b+1));
 				int channel_id = Utils.byte2toInt(finalmsg.get(b+2),finalmsg.get(b+3));
 				int msg_type = Utils.byte2toInt(finalmsg.get(b+4),finalmsg.get(b+5));
@@ -180,7 +185,11 @@ public class Utils {
 		}
 		else if(cmd==16){ //---Single Tune Response
 			int resp = Utils.byte2toInt(finalmsg.get(8),finalmsg.get(9));
-			String singletune_rsp = "Single Tune ID: " + resp;
+			String data_tune = "";
+			for(int i=10 ; i<finalmsg.size() ; i++){
+				data_tune = data_tune + "," + finalmsg.get(i);
+			}
+			String singletune_rsp = "Single Tune ID: " + resp + "\n" + data_tune;
 			
 			return general_string+singletune_rsp;
 		}

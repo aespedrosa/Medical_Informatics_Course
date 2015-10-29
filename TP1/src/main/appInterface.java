@@ -32,7 +32,7 @@ public class appInterface extends javax.swing.JFrame {
 	private JCheckBox invertCheckBox = new javax.swing.JCheckBox("Invert Bits");
 	private JTextField idTextField = new javax.swing.JTextField();
 	private JLabel idLabel = new javax.swing.JLabel();
-	private Thread thread_read;
+	private ThreadRead ThreadObject;
 
 	public appInterface() {
 		
@@ -204,44 +204,14 @@ public class appInterface extends javax.swing.JFrame {
 		textArea.append("COM Port Opened: " + port + "\n");
 		
 		//---Thread for Reading COM Buffer
-		this.thread_read = new Thread(new Runnable() {
-			public void run(){
-				BufferCircular buffer = new BufferCircular(1500);
-				int step = 100; //Timer ms
-				textArea.append("Listener Thread Started. Step " + step + "ms.\n");
-				
-				while(true){
-					try {
-						
-						byte[] msg = cominterface.readBytes();
-
-						if(msg.length!=0){
-
-							buffer.addBytes(msg);
-							
-							if(buffer.checkMessage()){
-								textArea.append("-----New Message Received-----\n");
-								textArea.append(Utils.messageReader(buffer.exportMessage())  + "\n");
-								textArea.append("------------------------------\n");
-							}
-						}
-						
-						Thread.sleep(step); 
-												
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});  
-		this.thread_read.start();
+		ThreadObject = new ThreadRead(textArea,cominterface);
+		ThreadObject.startThreadRead();
 	}
 
-	@SuppressWarnings("deprecation")
 	void closeButton_actionPerformed(java.awt.event.ActionEvent event) throws InterruptedException {
 		if (connected)
 			CMSInterface.disconnect(port);
-			this.thread_read.stop();
+			ThreadObject.stopThreadRead();
 			textArea.append("COM Port Closed: " + port + "\n");
 		try {
 			Thread.sleep(300);
