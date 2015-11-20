@@ -2,12 +2,24 @@ package main;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Iterator;
 import java.util.Vector;
 import fr.apteryx.imageio.dicom.Tag;
 import fr.apteryx.imageio.dicom.DataSet;
+import fr.apteryx.imageio.dicom.DicomMetadata;
+import fr.apteryx.imageio.dicom.DicomReader;
+
+import javax.imageio.ImageIO;
+import javax.imageio.stream.FileImageInputStream;
 import javax.swing.DefaultListSelectionModel;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.DefaultListSelectionModel;
@@ -26,7 +38,7 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 	/** Creates new form ExemploDicomDir */
 	DefaultListSelectionModel list;
 	public InterfaceDicom() {
-		initComponents(); //Do more stuff
+		initComponents();
 	}
 
 	/** This method is called from within the constructor to
@@ -254,11 +266,66 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 		//                examProp.frameAtributos.dispose();
 		DefaultListSelectionModel auxiliar = (DefaultListSelectionModel)(e.getSource());
 		if(auxiliar.equals(list) && e.getValueIsAdjusting() == false){
-			Atributes attTemp = (Atributes)atributosExames.elementAt(e.getFirstIndex());
+			Atributes attTemp = (Atributes) atributosExames.elementAt(e.getFirstIndex());
 			txtArea.setText(attTemp.regImage.toString());
 			
 			
 			//TODO Image Read Interface
+			
+			try {
+
+				ImageIO.scanForPlugins();
+
+				File f = new File(txtPath.getText() + filesExames.elementAt(e.getFirstIndex()).getPath());
+				
+				Iterator readers = ImageIO.getImageReadersByFormatName("DICOM");
+				DicomReader reader = (DicomReader)readers.next();
+				
+				reader.setInput(new FileImageInputStream(f));
+
+				DicomMetadata dmd = reader.getDicomMetadata();
+
+				if (reader.getNumImages(true) < 1) {
+					System.err.println("No pixel data");
+					System.exit(1);
+				}
+
+				BufferedImage bi_stored = reader.read(0);
+				
+				if (bi_stored == null) {
+					System.err.println("read error");
+					System.exit(1);
+				}
+
+				final BufferedImage bi = dmd.applyGrayscaleTransformations(bi_stored, 0);
+
+				JFrame jf = new JFrame();
+				jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				final Rectangle bounds = new Rectangle(0, 0, bi.getWidth(), bi.getHeight());
+				JPanel panel = new JPanel() {
+					public void paintComponent(Graphics g) {
+						Rectangle r = g.getClipBounds();
+						((Graphics2D)g).fill(r);
+						if (bounds.intersects(r))
+							try {
+								g.drawImage(bi, 0, 0, null);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+					}
+				};
+				jf.getContentPane().add(panel);
+				panel.setPreferredSize(new Dimension(bi.getWidth(), bi.getHeight()));
+				jf.pack();
+				jf.setVisible(true);
+
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			
+			
+			
+			
 			
 			
 		}
