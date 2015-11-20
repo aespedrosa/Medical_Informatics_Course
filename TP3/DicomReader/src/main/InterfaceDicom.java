@@ -27,8 +27,6 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 	DefaultListSelectionModel list;
 	public InterfaceDicom() {
 		initComponents();
-
-
 	}
 
 	/** This method is called from within the constructor to
