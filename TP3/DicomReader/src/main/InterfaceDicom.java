@@ -35,12 +35,13 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 	Vector<Atributes> atributosExames;
 	Vector<File> filesExames;
 	
-	/** Creates new form ExemploDicomDir */
+	/** Creates new form InterfaceDicom */
 	DefaultListSelectionModel list;
+
 	public InterfaceDicom() {
 		initComponents();
 	}
-
+	
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -190,6 +191,7 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 		pack();
 	}// </editor-fold>//GEN-END:initComponents
 
+	// ---> On Press Button "Show" 
 	private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
 
 		try{
@@ -205,7 +207,7 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 			atributosExames = new Vector<Atributes>();
 			filesExames = new Vector<File>();
 			
-			Vector<?> results = null;
+			Vector<Vector<Object>> results = new Vector<Vector<Object>>();
 			try{
 				results = dirRead.readDirectory(txtPath.getText(),atributosExames,filesExames); 
 			} catch(Exception e){
@@ -216,8 +218,9 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 			TableModel tbModel = new DefaultTableModel(results,colNames){
 				private static final long serialVersionUID = 1L;
 
-				public boolean isCellEditable(int row, int col)
-				{ return false; }
+				public boolean isCellEditable(int row, int col){
+					return false;
+				}
 			};
 
 			tableExames.setModel(tbModel);
@@ -243,28 +246,25 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 	/**
 	 * @param args the command line arguments
 	 */
-	public static void main(String args[]) 
-	{
-		try
-		{
+	public static void main(String args[]){
+		try{
 
-			java.awt.EventQueue.invokeLater(new Runnable() 
-			{
-				public void run() 
-				{
+			java.awt.EventQueue.invokeLater(new Runnable() {
+				public void run() {
 					new InterfaceDicom().setVisible(true);
 				}
 			});
 
-		} catch(Exception e)
-		{
+		} catch(Exception e){
 			System.out.println("Error in the Aplication...");
 		}
 	}
+
 	public void valueChanged(ListSelectionEvent e){
 		//        if(examProp.frameAtributos != null)
 		//                examProp.frameAtributos.dispose();
 		DefaultListSelectionModel auxiliar = (DefaultListSelectionModel)(e.getSource());
+
 		if(auxiliar.equals(list) && e.getValueIsAdjusting() == false){
 			Atributes attTemp = (Atributes) atributosExames.elementAt(e.getFirstIndex());
 			txtArea.setText(attTemp.regImage.toString());
@@ -279,7 +279,7 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 				File f = new File(txtPath.getText() + filesExames.elementAt(e.getFirstIndex()).getPath());
 				
 				Iterator readers = ImageIO.getImageReadersByFormatName("DICOM");
-				DicomReader reader = (DicomReader)readers.next();
+				DicomReader reader = (DicomReader) readers.next();
 				
 				reader.setInput(new FileImageInputStream(f));
 
