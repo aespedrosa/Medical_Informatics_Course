@@ -28,7 +28,7 @@ public class ReadDicomDir {
         Iterator<?> readers = ImageIO.getImageReadersByFormatName("DICOM");
         DicomReader reader = (DicomReader) readers.next();
         
-        FileSet rootDir = new FileSet(new File(path + "DICOMDIR"), reader);
+        FileSet rootDir = new FileSet(new File(path + "/DICOMDIR"), reader);
     	
         FileSet.Directory patientDir = rootDir.getRootDirectory();
         
@@ -46,7 +46,7 @@ public class ReadDicomDir {
     				
     				for (int i_index=0 ; i_index<imageDir.getNumRecords() ; i_index++){
     					
-    					if (! imageDir.getRecord(i_index).getType().equals("PRIVATE") ) {
+    					if ( true || imageDir.getRecord(i_index).getType().equals("PRIVATE") ) {
     						
     						Vector<Object> temp = new Vector<Object>();
     						
@@ -68,12 +68,9 @@ public class ReadDicomDir {
     						filesExames.addElement(imageDir.getRecord(i_index).getFile());
     						
     					}
-            				
-    				}
-    				
+    				}			
         		}
     		}
-    		
     	}
     	
         return results;

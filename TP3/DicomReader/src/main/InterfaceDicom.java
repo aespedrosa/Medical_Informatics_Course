@@ -1,5 +1,6 @@
 package main;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -15,8 +16,11 @@ import fr.apteryx.imageio.dicom.DicomMetadata;
 import fr.apteryx.imageio.dicom.DicomReader;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
 import javax.imageio.stream.FileImageInputStream;
+import javax.swing.Box;
 import javax.swing.DefaultListSelectionModel;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -31,17 +35,17 @@ import javax.swing.table.*;
 public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionListener{
 
 	private static final long serialVersionUID = 1L;
-	
+
 	Vector<Atributes> atributosExames;
 	Vector<File> filesExames;
-	
+
 	/** Creates new form InterfaceDicom */
 	DefaultListSelectionModel list;
 
 	public InterfaceDicom() {
 		initComponents();
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -73,7 +77,7 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 		setResizable(false);
-		txtPath.setText("/Users/alexandresayal/Documents/WorkspaceIC/DICOM_Data/");
+		txtPath.setText("C:/Users/alexa/workspace/Normais");
 		txtPath.setName("txtPath");
 
 		lblTitle.setText("DicomDir Path:");
@@ -197,7 +201,7 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 		try{
 
 			ReadDicomDir dirRead = new ReadDicomDir();
-			
+
 			Vector<String> colNames=new Vector<String>();
 			colNames.addElement("Tipo Exame");
 			colNames.addElement("ID");
@@ -206,7 +210,7 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 
 			atributosExames = new Vector<Atributes>();
 			filesExames = new Vector<File>();
-			
+
 			Vector<Vector<Object>> results = new Vector<Vector<Object>>();
 			try{
 				results = dirRead.readDirectory(txtPath.getText(),atributosExames,filesExames); 
@@ -261,73 +265,33 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 	}
 
 	public void valueChanged(ListSelectionEvent e){
-		//        if(examProp.frameAtributos != null)
-		//                examProp.frameAtributos.dispose();
+
 		DefaultListSelectionModel auxiliar = (DefaultListSelectionModel)(e.getSource());
 
 		if(auxiliar.equals(list) && e.getValueIsAdjusting() == false){
 			Atributes attTemp = (Atributes) atributosExames.elementAt(e.getFirstIndex());
 			txtArea.setText(attTemp.regImage.toString());
-			
-			
+
+
 			//TODO Image Read Interface
-			
+
 			try {
 
 				ImageIO.scanForPlugins();
-
-				File f = new File(txtPath.getText() + filesExames.elementAt(e.getFirstIndex()).getPath());
 				
-				Iterator readers = ImageIO.getImageReadersByFormatName("DICOM");
-				DicomReader reader = (DicomReader) readers.next();
+				int index = e.getFirstIndex();
+
+				File f = new File(txtPath.getText() + "/" + filesExames.elementAt(index).getPath());
+
+				long frameTime = atributosExames.elementAt(index).getImageAtributes().findLong(Tag.FrameTime);
 				
-				reader.setInput(new FileImageInputStream(f));
-
-				DicomMetadata dmd = reader.getDicomMetadata();
-
-				if (reader.getNumImages(true) < 1) {
-					System.err.println("No pixel data");
-					System.exit(1);
-				}
-
-				BufferedImage bi_stored = reader.read(0);
+				ViewerInterface viewer = new ViewerInterface(f , frameTime); 
 				
-				if (bi_stored == null) {
-					System.err.println("read error");
-					System.exit(1);
-				}
-
-				final BufferedImage bi = dmd.applyGrayscaleTransformations(bi_stored, 0);
-
-				JFrame jf = new JFrame();
-				jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				final Rectangle bounds = new Rectangle(0, 0, bi.getWidth(), bi.getHeight());
-				JPanel panel = new JPanel() {
-					public void paintComponent(Graphics g) {
-						Rectangle r = g.getClipBounds();
-						((Graphics2D)g).fill(r);
-						if (bounds.intersects(r))
-							try {
-								g.drawImage(bi, 0, 0, null);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-					}
-				};
-				jf.getContentPane().add(panel);
-				panel.setPreferredSize(new Dimension(bi.getWidth(), bi.getHeight()));
-				jf.pack();
-				jf.setVisible(true);
-
+				
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
-			
-			
-			
-			
-			
-			
+
 		}
 	}
 
