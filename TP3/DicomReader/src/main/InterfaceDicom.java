@@ -1,36 +1,18 @@
 package main;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.Iterator;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Vector;
-import fr.apteryx.imageio.dicom.Tag;
-import fr.apteryx.imageio.dicom.DataSet;
-import fr.apteryx.imageio.dicom.DicomMetadata;
-import fr.apteryx.imageio.dicom.DicomReader;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.FileImageInputStream;
-import javax.swing.Box;
 import javax.swing.DefaultListSelectionModel;
-import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.DefaultListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
-import javax.swing.table.*;
+import fr.apteryx.imageio.dicom.Tag;
 
 public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionListener{
 
@@ -265,34 +247,28 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 	}
 
 	public void valueChanged(ListSelectionEvent e){
-
-		DefaultListSelectionModel auxiliar = (DefaultListSelectionModel)(e.getSource());
-
-		if(auxiliar.equals(list) && e.getValueIsAdjusting() == false){
-			Atributes attTemp = (Atributes) atributosExames.elementAt(e.getFirstIndex());
-			txtArea.setText(attTemp.regImage.toString());
-
-
-			//TODO Image Read Interface
-
-			try {
-
-				ImageIO.scanForPlugins();
-				
-				int index = e.getFirstIndex();
-
-				File f = new File(txtPath.getText() + "/" + filesExames.elementAt(index).getPath());
-
-				long frameTime = atributosExames.elementAt(index).getImageAtributes().findLong(Tag.FrameTime);
-				
-				ViewerInterface viewer = new ViewerInterface(f , frameTime); 
-				
-				
-			} catch (Exception e1) {
+		
+        DefaultListSelectionModel auxiliar = (DefaultListSelectionModel)(e.getSource());
+        if(auxiliar.equals(list) && e.getValueIsAdjusting() == false){
+        	
+            Atributes attTemp = (Atributes)atributosExames.elementAt(e.getFirstIndex());
+            long frameTime = attTemp.getImageAtributes().findLong(Tag.FrameTime);
+            txtArea.setText(attTemp.regImage.toString());
+            
+            File f = new File(txtPath.getText() + "//" + filesExames.elementAt(e.getFirstIndex()));
+            
+            try {
+				@SuppressWarnings("unused")
+				ViewerInterface viewer = new ViewerInterface(f , frameTime);
+			} catch (FileNotFoundException e1) {
 				e1.printStackTrace();
-			}
-
-		}
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			} 
+        }
+		
+		
+		
 	}
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables

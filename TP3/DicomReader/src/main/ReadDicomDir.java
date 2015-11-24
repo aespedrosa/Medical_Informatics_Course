@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
 
 import fr.apteryx.imageio.dicom.DicomReader; 
 import fr.apteryx.imageio.dicom.FileSet; 
@@ -25,7 +26,7 @@ public class ReadDicomDir {
     	
     	ImageIO.scanForPlugins();
         
-        Iterator<?> readers = ImageIO.getImageReadersByFormatName("DICOM");
+        Iterator<ImageReader> readers = ImageIO.getImageReadersByFormatName("DICOM");
         DicomReader reader = (DicomReader) readers.next();
         
         FileSet rootDir = new FileSet(new File(path + "/DICOMDIR"), reader);
@@ -46,7 +47,7 @@ public class ReadDicomDir {
     				
     				for (int i_index=0 ; i_index<imageDir.getNumRecords() ; i_index++){
     					
-    					if ( true || imageDir.getRecord(i_index).getType().equals("PRIVATE") ) {
+    					if ( imageDir.getRecord(i_index).getType().equals("IMAGE") ) {
     						
     						Vector<Object> temp = new Vector<Object>();
     						
