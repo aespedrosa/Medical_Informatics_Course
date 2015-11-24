@@ -5,9 +5,7 @@ import java.io.Serializable;
 import fr.apteryx.imageio.dicom.Tag;
 import fr.apteryx.imageio.dicom.DataSet;
 
-
 public class Atributes implements Serializable{
-
 	private static final long serialVersionUID = 1L;
 
 	DataSet regPatient;
@@ -83,5 +81,4 @@ public class Atributes implements Serializable{
 		}
 		return false;
 	}
-
 }

@@ -1,7 +1,6 @@
 package main;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Vector;
 
@@ -88,6 +87,7 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 						"Title 1", "Title 2", "Title 3", "Title 4"
 				}
 				));
+		
 		jScrollPane2.setViewportView(tableExames);
 
 		fileMenu.setText("File");
@@ -181,7 +181,6 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 	private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
 
 		try{
-
 			ReadDicomDir dirRead = new ReadDicomDir();
 
 			Vector<String> colNames=new Vector<String>();
@@ -229,12 +228,8 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 		System.exit(0);
 	}//GEN-LAST:event_exitMenuItemActionPerformed
 
-	/**
-	 * @param args the command line arguments
-	 */
 	public static void main(String args[]){
 		try{
-
 			java.awt.EventQueue.invokeLater(new Runnable() {
 				public void run() {
 					new InterfaceDicom().setVisible(true);
@@ -247,28 +242,26 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 	}
 
 	public void valueChanged(ListSelectionEvent e){
-		
         DefaultListSelectionModel auxiliar = (DefaultListSelectionModel)(e.getSource());
+        int index = auxiliar.getMaxSelectionIndex();
+        
         if(auxiliar.equals(list) && e.getValueIsAdjusting() == false){
         	
-            Atributes attTemp = (Atributes)atributosExames.elementAt(e.getFirstIndex());
+            Atributes attTemp = (Atributes) atributosExames.elementAt(index);
+            
             long frameTime = attTemp.getImageAtributes().findLong(Tag.FrameTime);
+
             txtArea.setText(attTemp.regImage.toString());
             
-            File f = new File(txtPath.getText() + "//" + filesExames.elementAt(e.getFirstIndex()));
+            File f = new File(txtPath.getText() + "//" + filesExames.elementAt(index));
             
             try {
 				@SuppressWarnings("unused")
 				ViewerInterface viewer = new ViewerInterface(f , frameTime);
-			} catch (FileNotFoundException e1) {
-				e1.printStackTrace();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			} 
         }
-		
-		
-		
 	}
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables

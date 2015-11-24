@@ -23,6 +23,8 @@ import javax.swing.JPanel;
 
 import fr.apteryx.imageio.dicom.DicomMetadata;
 import fr.apteryx.imageio.dicom.DicomReader;
+import java.awt.Color;
+import javax.swing.SwingConstants;
 
 public class ViewerInterface implements Runnable {
 
@@ -35,17 +37,17 @@ public class ViewerInterface implements Runnable {
 	private int frameIndex;
 	private int framesNumber;
 	private long frameTime;
-	private DicomMetadata dmd;
+	private DicomMetadata dcmMetadata;
 
 	private boolean pause;
 
 	private DicomReader dicomReader;
 
 	public ViewerInterface(File imageFile , long frametime) throws FileNotFoundException, IOException {
-
 		thread = new Thread(this);
 
 		Iterator<ImageReader> readers = ImageIO.getImageReadersByFormatName("DICOM");
+		
 		dicomReader = (DicomReader) readers.next();
 
 		dicomReader.setInput(new FileImageInputStream(imageFile));
@@ -53,11 +55,13 @@ public class ViewerInterface implements Runnable {
 		frameIndex = 0;
 
 		framesNumber = dicomReader.getNumImages(true);
+
 		frameTime = frametime;
 
 		initializeInterface();
 
 		pause = true;
+		
 		thread.start();
 	}
 
@@ -67,7 +71,9 @@ public class ViewerInterface implements Runnable {
 	 */
 	private void initializeInterface() throws IOException {
 		frame = new JFrame();
-
+		
+		frame.setLocation(800, 100);
+		
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	
 		contentPanel = new JPanel();
@@ -76,8 +82,11 @@ public class ViewerInterface implements Runnable {
 		imagePanel = imagePanelCreator(0);
 
 		buttonPanel = new JPanel();
+		buttonPanel.setBackground(Color.BLACK);
 
 		JButton playButton = new JButton("Play");
+		playButton.setForeground(new Color(0, 0, 0));
+		playButton.setBackground(new Color(192, 192, 192));
 		playButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				pause = false;
@@ -85,6 +94,8 @@ public class ViewerInterface implements Runnable {
 		});
 
 		JButton pauseButton = new JButton("Pause");
+		pauseButton.setForeground(new Color(0, 0, 0));
+		pauseButton.setBackground(new Color(192, 192, 192));
 		pauseButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				pause = true;
@@ -92,6 +103,8 @@ public class ViewerInterface implements Runnable {
 		});
 
 		JButton stopButton = new JButton("Stop");
+		stopButton.setForeground(new Color(0, 0, 0));
+		stopButton.setBackground(new Color(192, 192, 192));
 		stopButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				pause = true;
@@ -100,6 +113,8 @@ public class ViewerInterface implements Runnable {
 		});
 
 		frameLabel = new JLabel("Frame "+frameIndex);
+		frameLabel.setHorizontalAlignment(SwingConstants.LEADING);
+		frameLabel.setForeground(Color.WHITE);
 		
 		buttonPanel.add(frameLabel,BorderLayout.PAGE_START);
 		buttonPanel.add(playButton);
@@ -125,7 +140,6 @@ public class ViewerInterface implements Runnable {
 				frameLabel.setText("Frame " + frameIndex);
 				
 				contentPanel.add(imagePanel);
-
 				contentPanel.validate();
 
 				if (! pause){	
@@ -140,15 +154,14 @@ public class ViewerInterface implements Runnable {
 	}
 
 	public JPanel imagePanelCreator(int frame_i) throws IOException{
+		dcmMetadata = dicomReader.getDicomMetadata();
+		
+		BufferedImage buffImage_stored = dicomReader.read(frame_i);
+		BufferedImage buffImage = dcmMetadata.applyGrayscaleTransformations(buffImage_stored, 0);
 
-		dmd = dicomReader.getDicomMetadata();
-		BufferedImage bi_stored = dicomReader.read(frame_i);
-		BufferedImage bi = dmd.applyGrayscaleTransformations(bi_stored, 0);
-
-		Rectangle bounds = new Rectangle(0,0,bi.getWidth(),bi.getHeight());
+		Rectangle bounds = new Rectangle(0,0,buffImage.getWidth(),buffImage.getHeight());
 
 		JPanel imageP =  new JPanel(){
-
 			private static final long serialVersionUID = 1L;
 
 			public void paintComponent(Graphics g) {
@@ -156,16 +169,14 @@ public class ViewerInterface implements Runnable {
 				((Graphics2D)g).fill(r);
 				if (bounds.intersects(r))
 					try {
-						g.drawImage(bi, 0, 0, null);
+						g.drawImage(buffImage, 0, 0, null);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 			}
 		};
-		imageP.setPreferredSize(new Dimension(bi.getWidth(), bi.getHeight()));
+		imageP.setPreferredSize(new Dimension(buffImage.getWidth(), buffImage.getHeight()));
 		
 		return imageP;
 	}
-
-
 }
