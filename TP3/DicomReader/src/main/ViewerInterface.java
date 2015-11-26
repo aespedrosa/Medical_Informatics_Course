@@ -62,14 +62,14 @@ public class ViewerInterface implements Runnable {
 		frameTime = frametime;
 				
 		loadFrames();
-		System.out.println("ola1");
+
 		initializeInterface();
-		System.out.println("ola1");
+
 		pause = true;
 		stop = false;
 		
 		thread.start();
-		System.out.println("ola1");
+
 	}
 
 	/**
@@ -147,10 +147,9 @@ public class ViewerInterface implements Runnable {
 		for (int i=0;i<framesNumber;i++){
 			
 			BufferedImage buffImage_stored = dicomReader.read(i);
-			framesArray[i] =  dcmMetadata.applyGrayscaleTransformations(buffImage_stored, 0);
+			framesArray[i] = dcmMetadata.applyGrayscaleTransformations(buffImage_stored, 0);
 		
-		}
-		
+		}	
 	}
 	
 	@Override
@@ -158,7 +157,7 @@ public class ViewerInterface implements Runnable {
 		while(true){
 			try {
 
-				if ( (! pause) || stop){	
+				if ((! pause) || stop){	
 
 					stop = false;
 					
@@ -174,6 +173,7 @@ public class ViewerInterface implements Runnable {
 					Thread.sleep(frameTime);
 					
 				}
+
 
 			} catch (IOException | InterruptedException e) {
 				e.printStackTrace();

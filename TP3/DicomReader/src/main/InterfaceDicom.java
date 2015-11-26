@@ -254,7 +254,7 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
             txtArea.setText(attTemp.regImage.toString());
             
             File f = new File(txtPath.getText() + "//" + filesExames.elementAt(index));
-            System.out.println("ola");
+
             try {
 				@SuppressWarnings("unused")
 				ViewerInterface viewer = new ViewerInterface(f , frameTime);
