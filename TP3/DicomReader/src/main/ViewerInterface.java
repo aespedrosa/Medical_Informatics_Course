@@ -38,9 +38,12 @@ public class ViewerInterface implements Runnable {
 	private int framesNumber;
 	private long frameTime;
 	private DicomMetadata dcmMetadata;
+	
+	private BufferedImage[] framesArray;
 
 	private boolean pause;
-
+	private boolean stop;
+	
 	private DicomReader dicomReader;
 
 	public ViewerInterface(File imageFile , long frametime) throws FileNotFoundException, IOException {
@@ -57,12 +60,16 @@ public class ViewerInterface implements Runnable {
 		framesNumber = dicomReader.getNumImages(true);
 
 		frameTime = frametime;
-
+				
+		loadFrames();
+		System.out.println("ola1");
 		initializeInterface();
-
+		System.out.println("ola1");
 		pause = true;
+		stop = false;
 		
 		thread.start();
+		System.out.println("ola1");
 	}
 
 	/**
@@ -90,6 +97,7 @@ public class ViewerInterface implements Runnable {
 		playButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				pause = false;
+				stop = false;
 			}
 		});
 
@@ -108,6 +116,7 @@ public class ViewerInterface implements Runnable {
 		stopButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				pause = true;
+				stop = true;
 				frameIndex = 0;
 			}
 		});
@@ -130,21 +139,40 @@ public class ViewerInterface implements Runnable {
 		frame.setVisible(true);
 	}
 
+	public void loadFrames() throws IOException{
+		
+		framesArray = new BufferedImage[framesNumber];
+		dcmMetadata = dicomReader.getDicomMetadata();
+		
+		for (int i=0;i<framesNumber;i++){
+			
+			BufferedImage buffImage_stored = dicomReader.read(i);
+			framesArray[i] =  dcmMetadata.applyGrayscaleTransformations(buffImage_stored, 0);
+		
+		}
+		
+	}
+	
 	@Override
 	public void run() {
 		while(true){
 			try {
-				contentPanel.remove(imagePanel);
 
-				imagePanel = imagePanelCreator(frameIndex);
-				frameLabel.setText("Frame " + frameIndex);
-				
-				contentPanel.add(imagePanel);
-				contentPanel.validate();
+				if ( (! pause) || stop){	
 
-				if (! pause){	
+					stop = false;
+					
+					contentPanel.remove(imagePanel);
+
+					imagePanel = imagePanelCreator(frameIndex);
+					frameLabel.setText("Frame " + frameIndex);
+
+					contentPanel.add(imagePanel);
+					contentPanel.validate();
+					
 					frameIndex = (frameIndex+1) % framesNumber;
 					Thread.sleep(frameTime);
+					
 				}
 
 			} catch (IOException | InterruptedException e) {
@@ -154,11 +182,9 @@ public class ViewerInterface implements Runnable {
 	}
 
 	public JPanel imagePanelCreator(int frame_i) throws IOException{
-		dcmMetadata = dicomReader.getDicomMetadata();
-		
-		BufferedImage buffImage_stored = dicomReader.read(frame_i);
-		BufferedImage buffImage = dcmMetadata.applyGrayscaleTransformations(buffImage_stored, 0);
 
+		BufferedImage buffImage = framesArray[frame_i];
+		
 		Rectangle bounds = new Rectangle(0,0,buffImage.getWidth(),buffImage.getHeight());
 
 		JPanel imageP =  new JPanel(){

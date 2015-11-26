@@ -244,7 +244,7 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
 	public void valueChanged(ListSelectionEvent e){
         DefaultListSelectionModel auxiliar = (DefaultListSelectionModel)(e.getSource());
         int index = auxiliar.getMaxSelectionIndex();
-        
+
         if(auxiliar.equals(list) && e.getValueIsAdjusting() == false){
         	
             Atributes attTemp = (Atributes) atributosExames.elementAt(index);
@@ -254,7 +254,7 @@ public class InterfaceDicom extends javax.swing.JFrame implements ListSelectionL
             txtArea.setText(attTemp.regImage.toString());
             
             File f = new File(txtPath.getText() + "//" + filesExames.elementAt(index));
-            
+            System.out.println("ola");
             try {
 				@SuppressWarnings("unused")
 				ViewerInterface viewer = new ViewerInterface(f , frameTime);
