@@ -1,4 +1,4 @@
-function [ inside, BPM , difference , veridict , v ] = noiseDetector( ecg , fs )
+function [ BPM , difference , auc , veridict , v ] = noiseDetector( ecg , fs )
 %UNTITLED5 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -11,11 +11,11 @@ e0 = ecg - mean_ecg;
 e0 = e0 / max(e0);
 
 %% Histogram
-N = histcounts(diff(e0),[-0.25 0.25]);
-inside = N / length(e0);
+% N = histcounts(diff(e0),[-0.25 0.25]);
+% inside = N / length(e0);
 
 %% BPM
-Rindexes = RPeakDetector( e0 , fs );
+Rindexes = RPeakDetector( e0 , fs , false);
 BPM = ( length(Rindexes)*60 ) / max(t);
 
 %% Filtering
@@ -28,13 +28,18 @@ ecg_filtered = filtfilt(b , a , e0);
 
 difference = sum( (e0-ecg_filtered).^2 );
 
-%% Classify
-v1 = BPM<10 || BPM > 240;
-v2 = difference > 0.01;
-v3 = inside < 0.99;
-v = [v1 v2 v3];
+%% Frequency Domain
+Pxx = pburg(e0,20);
+auc = trapz(Pxx);
 
-if (v1+v2+v3) >= 2
+%% Classify
+v1 = BPM<10 || BPM > 180;
+v2 = difference > 0.02;
+%v3 = inside < 0.9;
+v4 = auc > 15;
+v = [v1 v2 v4];
+
+if (v1+v2+v4) >= 2
     veridict = -1;
 else
     veridict = 0;

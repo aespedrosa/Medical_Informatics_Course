@@ -11,7 +11,7 @@ e0 = e0 / max(e0);
 
 %% Low Pass Filter
 order = 4;
-wc = 25; %Cut-off freq in Hz
+wc = 45; %Cut-off freq in Hz
 fc = wc/(0.5*fs); %Normalized cut-off freq
 
 [b,a] = butter(order,fc);
