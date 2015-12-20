@@ -1,4 +1,4 @@
-function [ Rindexes , RindexesECG , BPM ] = RPeakDetector( ecg , fs , display )
+function [ RindexesECG , BPM ] = RPeakDetector( ecg , fs , display )
 %RPEAKDETECTOR Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -30,7 +30,7 @@ e5= 10*filtfilt(b,a, e4);
 %% Find R Peaks in Energy
 Rindexes = [];
 % threshold = mean(e5)-0.5*std(e5);
-threshold = 0.6*mean(e5);
+threshold = 0.7*mean(e5);
 
 for i=2:length(e5)-1
    if (e5(i) > threshold && e5(i-1) < e5(i) && e5(i+1) < e5(i))
@@ -51,7 +51,7 @@ end
 %% Find R Peaks in ECG
 RindexesECG = zeros(size(Rindexes));
 
-w = round(0.5 * mean(diff(Rindexes)));
+w = round(0.25 * mean(diff(Rindexes)));
 
 for p=1:length(Rindexes)
     inf_limit = Rindexes(p)-w;
@@ -77,7 +77,7 @@ if display
     grid on
 end
 
-BPM = ( length(Rindexes)*60 ) / max(t);
+BPM = ( length(RindexesECG)*60 ) / max(t);
 
 if display
     fprintf('BPM: %0.2f bpm \n',BPM);

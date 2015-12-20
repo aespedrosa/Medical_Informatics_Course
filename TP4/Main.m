@@ -1,6 +1,6 @@
 %% ---------- ECG Analysis ----------- %%
-% -------- Inform?tica M?dica -------- %
-% - Alexandre Campos | Andr? Pedrosa - %
+% -------- Informatica Medica -------- %
+% - Alexandre Campos | Andre Pedrosa - %
 % --------------- 2015 --------------- %
 
 %% =============== DATA DATARR =============== %%

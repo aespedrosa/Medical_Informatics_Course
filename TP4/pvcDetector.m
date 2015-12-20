@@ -12,7 +12,7 @@ D = diff(Rindexes);
 
 mean_dist = mean(D);
 
-PVCindexes = Rindexes( D<=mean_dist );
+PVCindexes = Rindexes( [false D<=0.75*mean_dist] );
 
 %% Width QRS
 area = zeros(size(Rindexes));
@@ -35,7 +35,7 @@ end
 mean_area = mean(area);
 std_area = std(area);
 
-PVCindexes2 = Rindexes( area>mean_area-std_area );
+PVCindexes2 = Rindexes( area > mean_area-std_area );
 
 %% Union
 PVCindexes3 = union(PVCindexes,PVCindexes2);
