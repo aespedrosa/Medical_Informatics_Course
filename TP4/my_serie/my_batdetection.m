@@ -26,9 +26,17 @@ step=fix(mean(difere)/2);
 real_peak=[];
 
 for j=1:length(peaks)
-    janela=signal((peaks(j)-step):(peaks(j)+step));
-    coiso=find(janela==max(janela))
-    real_peak=[real_peak +coiso(1)+peaks(j)-step];
+    inferior=(peaks(j)-step);
+    superior=(peaks(j)+step);
+    if(inferior<1)
+        inferior=1;
+    end
+    if(superior>length(signal))
+        superior=length(signal);
+    end
+    janela=signal(inferior:superior);
+    [~,max_janela]=max(janela);
+    real_peak=[real_peak max_janela+inferior];
 end
 
 real_peak=real_peak-1;

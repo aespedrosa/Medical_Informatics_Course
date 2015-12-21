@@ -1,4 +1,4 @@
-function e2=my_filtragem(signal,f_top,f_down)
+function e2=my_filtragem(e0,fs,f_top,f_down)
 
 % Filtro Passa Baixo
 ordem=4;
