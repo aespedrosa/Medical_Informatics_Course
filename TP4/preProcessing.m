@@ -1,4 +1,4 @@
-function [ ecg_processed ] = preProcessing( ecg , fs )
+function [ e0 , ecg_processed ] = preProcessing( ecg , fs )
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -11,7 +11,7 @@ e0 = e0 / max(e0);
 
 %% Low Pass Filter
 order = 4;
-wc = 45; %Cut-off freq in Hz
+wc = 25; %Cut-off freq in Hz
 fc = wc/(0.5*fs); %Normalized cut-off freq
 
 [b,a] = butter(order,fc);
