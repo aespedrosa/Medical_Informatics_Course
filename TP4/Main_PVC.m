@@ -27,9 +27,11 @@ t = 0:(1/fs):N/fs-(1/fs);
 [ecg_norm , ecg_pre] = preProcessing( ecg , fs );
 
 %% ===== Feature Extraction and Peak Detection ===== %%
-windowsize = 30; %in seconds
+windowsize = 2600; %in seconds
 window = 1:(windowsize * fs);
 maxindex = floor( N / (fs*windowsize) );
+
+if maxindex<1; disp('Adjust windowsize: too large.'); end
 
 RPeakIndexes = zeros(N,1);
 PVCPeakIndexes = zeros(N,1);
@@ -43,7 +45,7 @@ for w = 1:maxindex
     
     RPeakIndexes(RwindowIndexes + window(1) - 1) = 1;
     
-    %---Area under Curve
+    %---PVC
     [PVCwindowIndexes1,PVCwindowIndexes2,PVCwindowIndexes3,PVCwindowIndexes4] = ...
                 pvcDetector( sub_ecg , RwindowIndexes );
     
@@ -52,32 +54,23 @@ for w = 1:maxindex
     window = window + fs*windowsize;
 end
 
-%% Comparison ECG, R Peaks, PVC Peaks - With Normalization
-figure
-    plot(t,ecg_norm,t(RPeakIndexes==1),ecg_norm(RPeakIndexes==1),'o',...
-        t(PVCPeakIndexes==1),ecg_norm(PVCPeakIndexes==1),'x')
-    legend('ECG (Normalized)','R Peaks','PVC','Location','Southeast');
-    xlabel('Time (s)'); ylabel('Amplitude');
-    title('PVC Detection')
-    xlim([0 max(t)])
-
 %% Comparison ECG, R Peaks, PVC Peaks - With Preprocessing
 figure
     plot(t,ecg_pre,t(RPeakIndexes==1),ecg_pre(RPeakIndexes==1),'o',...
         t(PVCPeakIndexes==1),ecg_pre(PVCPeakIndexes==1),'x')
-    legend('ECG (Normalized)','R Peaks','PVC','Location','Southeast');
+    legend('ECG (Preprocessed)','R Peaks','PVC','Location','Southeast');
     xlabel('Time (s)'); ylabel('Amplitude');
-    title('PVC Detection')
+    title('PVC Detection Result')
     xlim([0 max(t)])
 
 %% Accuracy R Peaks
 trueR = zeros(N,1);
 trueR(Rind) = 1;
 
-CM1 = peakComparator( 'R' , trueR , RPeakIndexes , ecg_pre , fs , true);    
+CM1 = peakComparator( 'R' , trueR , RPeakIndexes , ecg , fs , true);    
     
 %% Accuracy PVC
 truePVC = zeros(N,1);
 truePVC(PVCind) = 1;
 
-CM2 = peakComparator( 'PVC' , truePVC , PVCPeakIndexes , ecg_pre , fs , true);
+CM2 = peakComparator( 'PVC' , truePVC , PVCPeakIndexes , ecg , fs , true);

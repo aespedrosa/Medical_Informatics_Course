@@ -32,55 +32,58 @@ Rindexes = [];
 threshold = 0.7*mean(e5);
 
 for i=2:length(e5)-1
-   if (e5(i) > threshold && e5(i-1) < e5(i) && e5(i+1) < e5(i))
-       Rindexes = [Rindexes i];
-   end
+    if (e5(i) > threshold && e5(i-1) < e5(i) && e5(i+1) < e5(i))
+        Rindexes = [Rindexes i];
+    end
 end
 
 if display
     figure()
-        plot(t,e5, ...
-            t(Rindexes),e5(Rindexes),'o');
-        legend('Energy','R Peaks');
-        title('R Peaks Detection');
-        xlabel('Time (s)')
-        grid on 
-end
-
-%% Find R Peaks in ECG
-RindexesECG = zeros(size(Rindexes));
-
-w = round(0.2 * mean(diff(Rindexes)));
-
-for p=1:length(Rindexes)
-    inf_limit = Rindexes(p)-w;
-    sup_limit = Rindexes(p)+w;
-    
-    if (inf_limit < 1); inf_limit = 1; end
-    if (sup_limit > N); sup_limit = N; end
-    
-    
-    sub_e2 = e2(inf_limit : sup_limit);
-    
-    [~,temp] = max(sub_e2);
-    
-    RindexesECG(p) = temp + inf_limit - 1;
-end
-    
-if display
-    figure()
-    plot(t,e2, ...
-        t(RindexesECG),e2(RindexesECG),'o');
-    legend('Preprocessed ECG','R Peaks');
+    plot(t,e5, ...
+        t(Rindexes),e5(Rindexes),'o');
+    legend('Energy','R Peaks');
     title('R Peaks Detection');
     xlabel('Time (s)')
     grid on
 end
 
-BPM = ( length(RindexesECG)*60 ) / max(t);
+%% Find R Peaks in ECG
+RindexesECG = zeros(size(Rindexes));
 
-if display
-    fprintf('BPM: %0.2f bpm \n',BPM);
+if length(Rindexes) > 1
+    w = round(0.2 * mean(diff(Rindexes)));
+    
+    for p=1:length(Rindexes)
+        inf_limit = Rindexes(p)-w;
+        sup_limit = Rindexes(p)+w;
+        
+        if (inf_limit < 1); inf_limit = 1; end
+        if (sup_limit > N); sup_limit = N; end
+        
+        
+        sub_e2 = e2(inf_limit : sup_limit);
+        
+        [~,temp] = max(sub_e2);
+        
+        RindexesECG(p) = temp + inf_limit - 1;
+    end
+    
+    if display
+        figure()
+        plot(t,e2, ...
+            t(RindexesECG),e2(RindexesECG),'o');
+        legend('Preprocessed ECG','R Peaks');
+        title('R Peaks Detection');
+        xlabel('Time (s)')
+        grid on
+    end
+    
+    BPM = ( length(RindexesECG)*60 ) / max(t);
+    
+    if display
+        fprintf('BPM: %0.2f bpm \n',BPM);
+    end
+else
+    BPM = 0;
 end
-
 end

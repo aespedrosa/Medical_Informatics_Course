@@ -1,49 +1,18 @@
-function [ BPM , difference , auc , veridict , v ] = noiseDetector( ecg , fs )
-%UNTITLED5 Summary of this function goes here
+function [ predictedClass , CM ] = noiseDetector( trueClass , BPM , DIFF , AUC )
+%UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
-N = length(ecg);
-t = 0:(1/fs):N/fs-(1/fs);
+ind1 = (BPM < 20) | (BPM > 200);
+ind2 = DIFF > mean(DIFF)+std(DIFF);
+ind3 = AUC > nanmean(AUC)+nanstd(AUC);
 
-%% Normalization
-mean_ecg = mean(ecg);
-e0 = ecg - mean_ecg;
-e0 = e0 / max(e0);
+pred = ind2;
 
-%% Histogram
-% N = histcounts(diff(e0),[-0.25 0.25]);
-% inside = N / length(e0);
 
-%% BPM
-Rindexes = RPeakDetector( e0 , fs , false);
-BPM = ( length(Rindexes)*60 ) / max(t);
 
-%% Filtering
-order = 4;
-wc = 25; %Cut-off freq in Hz
-fc = wc/(0.5*fs); %Normalized cut-off freq
 
-[b,a] = butter(order,fc);
-ecg_filtered = filtfilt(b , a , e0);
-
-difference = sum( (e0-ecg_filtered).^2 );
-
-%% Frequency Domain
-Pxx = pburg(e0,20);
-auc = trapz(Pxx);
-
-%% Classify
-v1 = BPM<10 || BPM > 180;
-v2 = difference > 0.02;
-%v3 = inside < 0.9;
-v4 = auc > 15;
-v = [v1 v2 v4];
-
-if (v1+v2+v4) >= 2
-    veridict = -1;
-else
-    veridict = 0;
-end
+predictedClass = zeros(size(trueClass));
+predictedClass(pred==1) = -1;
 
 
 end

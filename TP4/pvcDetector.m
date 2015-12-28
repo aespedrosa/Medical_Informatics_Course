@@ -12,13 +12,13 @@ D = diff(Rindexes);
 
 mean_dist = mean(D);
 
-PVCindexes1 = Rindexes( [false D<=0.7*mean_dist] );
+PVCindexes1 = Rindexes( [false D < 0.7*mean_dist] );
 
 %% Width QRS
 area = zeros(size(Rindexes));
+N = length(ecg);
 
 w = round(0.1 * mean_dist);
-N = length(ecg);
 
 for p=1:length(Rindexes)
     inf_limit = Rindexes(p)-w;
@@ -54,12 +54,13 @@ for p=1:length(Rindexes)
     approx_diff(p) = sum((sub_ecg-h).^2);
 end
 
-PVCindexes3 = Rindexes( approx_diff > 0.4);
+PVCindexes3 = Rindexes( approx_diff > mean(approx_diff)*1.1 );
 
 %% Union
-PVCindexes4 = intersect(PVCindexes1,PVCindexes3);
-
-
-
+i1 = intersect(PVCindexes1,PVCindexes3);
+i2 = intersect(PVCindexes1,PVCindexes2);
+i3 = intersect(PVCindexes2,PVCindexes3);
+u1 = union(i1,i2);
+PVCindexes4 = union(u1,i3);
 
 end

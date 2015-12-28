@@ -39,21 +39,14 @@ switch type
         
     case 'PVC'
         % Method 2 - For PVC Peak Comparison
-        w = 1;
+        w = 30;
         
-        TP = 0; TN = 0;
-        FP = 0; FN = 0;
+        TP = 0; FN = 0;
         
         for p=w+1:N-w
             
-            if truePeaks(p) == 0
+            if truePeaks(p) == 1
                 if any(predictedPeaks(p-w : p+w)==1)
-                    FP = FP + 1;
-                else
-                    TN = TN + 1;
-                end
-            else
-                if any(predictedPeaks(p-w:p+w)==1)
                     TP = TP + 1;
                 else
                     FN = FN + 1;
@@ -61,6 +54,11 @@ switch type
             end
             
         end
+        
+        detected = sum(predictedPeaks);
+        
+        FP = detected - TP;
+        TN = N - TP - FN - FP;
         
         CM = [TN FN ; FP TP];
         
