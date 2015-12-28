@@ -1,18 +1,16 @@
-function [ Rindexes , BPM , difference , auc , veridict , v ] = noiseFeatExtract( ecg_norm , fs , display)
+function [ Rindexes , inside , BPM , difference , auc ,aucband ,ratio,other] = noiseFeatExtract( ecg_norm , fs )
 %UNTITLED5 Summary of this function goes here
 %   Detailed explanation goes here
 
-N = length(ecg_norm);
-t = 0:(1/fs):N/fs-(1/fs);
-
 %% Histogram
-% N = histcounts(diff(e0),[-0.25 0.25]);
-% inside = N / length(e0);
+N = histcounts(diff(ecg_norm),[-0.1 0.1]);
+inside = N / length(diff(ecg_norm));
 
 %% BPM
 [Rindexes , BPM ] = RPeakDetector( ecg_norm , fs , false);
 
 %% Filtering
+warning('off','signal:filtfilt:ParseB')
 order = 4;
 wc = 40; %Cut-off freq in Hz
 fc = wc/(0.5*fs); %Normalized cut-off freq
@@ -23,22 +21,31 @@ ecg_filtered = filtfilt(b , a , ecg_norm);
 difference = sum( (ecg_norm-ecg_filtered).^2 );
 
 %% Frequency Domain
-Pxx = pburg(ecg_norm,20);
+[Pxx , W] = pburg(ecg_norm,20,0:0.001:pi);
 auc = trapz(Pxx);
 
-%% Classify
-v1 = BPM<10 || BPM > 180;
-v2 = difference > 0.2;
-%v3 = inside < 0.9;
-v4 = auc > 15;
-v = [v1 v2 v4];
+%% Bands
+aucband = zeros(1,4);
+aucband(1) = trapz( Pxx(W > pi/fs & W <= 2*pi/fs) );
+aucband(2) = trapz( Pxx(W > 2*pi/fs & W <= 6*pi/fs) );
+aucband(3) = trapz( Pxx(W > 6*pi/fs & W <= 40*pi/fs) );
+aucband(4) = trapz( Pxx(W > 40*pi/fs) );
 
-if (v1+v2+v4) >= 2
-    veridict = -1;
-else
-    veridict = 0;
+%% Freq Peak
+[~,wp] = max(Pxx);
+suplimit = wp+15;
+
+if suplimit > length(Pxx)
+    suplimit = length(Pxx);
 end
 
+int1 = trapz(Pxx(wp:suplimit-10));
+int2 = trapz(Pxx(wp:suplimit));
+
+ratio = int1 / int2;
+
+%% Other
+other = sum(Pxx < 0.1*mean(Pxx));
 
 end
 
