@@ -27,7 +27,7 @@ SE = TP * 100 / (TP + FN);
 
 B_acc = (SP + SE) / 2;
 
-table_row_noise = [sum(predictedNoiseClass) sum(trueNoiseClass) SP SE B_acc];
+table_row_noise = [TP sum(predictedNoiseClass) sum(trueNoiseClass) SP SE B_acc];
 
 if displayConsole
     fprintf('----- Noise Detection Accuracy -----\n')
@@ -56,7 +56,7 @@ SE = TP * 100 / (TP + FN);
 
 B_acc = (SP + SE) / 2;
 
-table_row_vt = [sum(predictedVTClass) sum(trueVTClass) SP SE B_acc];
+table_row_vt = [TP sum(predictedVTClass) sum(trueVTClass) SP SE B_acc];
 
 if displayConsole
     fprintf('----- VT Detection Accuracy -----\n')
