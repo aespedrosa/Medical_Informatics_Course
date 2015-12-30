@@ -1,4 +1,4 @@
-function [ Rindexes , inside , BPM , difference , auc ,aucband ,ratio,other] = noiseFeatExtract( ecg_norm , fs )
+function [ BPM , inside , difference , auc , aucband , ratio , sumlower ] = featExtract( ecg_norm , fs )
 %UNTITLED5 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -7,15 +7,14 @@ N = histcounts(diff(ecg_norm),[-0.1 0.1]);
 inside = N / length(diff(ecg_norm));
 
 %% BPM
-[Rindexes , BPM ] = RPeakDetector( ecg_norm , fs , false);
+[~ , BPM ] = RPeakDetector( ecg_norm , fs , false , true );
 
 %% Filtering
-warning('off','signal:filtfilt:ParseB')
-order = 4;
-wc = 40; %Cut-off freq in Hz
+order = 6;
+wc = 30; %Cut-off freq in Hz
 fc = wc/(0.5*fs); %Normalized cut-off freq
 
-[b,a] = butter(order,fc);
+[b,a] = butter(order,fc,'low');
 ecg_filtered = filtfilt(b , a , ecg_norm);
 
 difference = sum( (ecg_norm-ecg_filtered).^2 );
@@ -33,7 +32,7 @@ aucband(4) = trapz( Pxx(W > 40*pi/fs) );
 
 %% Freq Peak
 [~,wp] = max(Pxx);
-suplimit = wp+15;
+suplimit = wp + 15;
 
 if suplimit > length(Pxx)
     suplimit = length(Pxx);
@@ -45,7 +44,7 @@ int2 = trapz(Pxx(wp:suplimit));
 ratio = int1 / int2;
 
 %% Other
-other = sum(Pxx < 0.1*mean(Pxx));
+sumlower = sum(Pxx < 0.1*mean(Pxx));
 
 end
 

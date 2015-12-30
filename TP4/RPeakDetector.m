@@ -1,9 +1,10 @@
-function [ RindexesECG , BPM ] = RPeakDetector( ecg , fs , display )
+function [ RindexesECG , BPM ] = RPeakDetector( ecg , fs , display ,correction )
 %RPEAKDETECTOR Summary of this function goes here
 %   Detailed explanation goes here
 
 if nargin < 3
     display = false;
+    correction = false;
 end
 
 e2 = ecg;
@@ -19,7 +20,7 @@ e3(end+1) = e2(end);
 e4 = 50*e3.^2;
 
 %% Moving Average
-timew = 0.05; %Window
+timew = 0.06; %Window
 Nw = fix(timew*fs);    % samplings (even)
 
 b = (1/Nw)*ones(1,Nw);
@@ -43,7 +44,7 @@ if display
         t(Rindexes),e5(Rindexes),'o');
     legend('Energy','R Peaks');
     title('R Peaks Detection');
-    xlabel('Time (s)')
+    xlabel('Time (s)'), ylabel('Energy')
     grid on
 end
 
@@ -59,8 +60,7 @@ if length(Rindexes) > 1
         
         if (inf_limit < 1); inf_limit = 1; end
         if (sup_limit > N); sup_limit = N; end
-        
-        
+                
         sub_e2 = e2(inf_limit : sup_limit);
         
         [~,temp] = max(sub_e2);
@@ -68,6 +68,11 @@ if length(Rindexes) > 1
         RindexesECG(p) = temp + inf_limit - 1;
     end
     
+    if correction
+        m = mean(ecg(RindexesECG));
+        RindexesECG (ecg(RindexesECG) < m*0.9) = [];
+    end
+
     if display
         figure()
         plot(t,e2, ...
@@ -86,4 +91,5 @@ if length(Rindexes) > 1
 else
     BPM = 0;
 end
+
 end

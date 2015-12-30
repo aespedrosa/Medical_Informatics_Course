@@ -1,18 +1,13 @@
-function [PVCindexes1 , PVCindexes2 , PVCindexes3 , PVCindexes4] = pvcDetector( ecg , Rindexes )
+function [PVCindexes4] = pvcDetector( ecg , Rindexes )
 %PVCDETECTOR Summary of this function goes here
 %   Detailed explanation goes here
-
-% Data Source: DATPVC
-
-% Largura QRS
-% Intervalo RR
 
 %% RR
 D = diff(Rindexes);
 
 mean_dist = mean(D);
 
-PVCindexes1 = Rindexes( [false D < 0.7*mean_dist] );
+PVCindexes1 = Rindexes( [false D < 0.75*mean_dist] );
 
 %% Width QRS
 area = zeros(size(Rindexes));
@@ -54,13 +49,17 @@ for p=1:length(Rindexes)
     approx_diff(p) = sum((sub_ecg-h).^2);
 end
 
-PVCindexes3 = Rindexes( approx_diff > mean(approx_diff)*1.1 );
+PVCindexes3 = Rindexes( approx_diff > mean(approx_diff)*1.5 );
 
-%% Union
-i1 = intersect(PVCindexes1,PVCindexes3);
-i2 = intersect(PVCindexes1,PVCindexes2);
-i3 = intersect(PVCindexes2,PVCindexes3);
-u1 = union(i1,i2);
-PVCindexes4 = union(u1,i3);
+%% Voting
+PVCindexes4 = [];
+u1 = union(PVCindexes1,PVCindexes2);
+u2 = union(u1,PVCindexes3);
+
+for ind = 1:length(u2)
+    if length(find(PVCindexes1==u2(ind))) + length(find(PVCindexes2==u2(ind))) + length(find(PVCindexes3==u2(ind))) > 1
+        PVCindexes4 = [PVCindexes4 u2(ind)];
+    end
+end
 
 end

@@ -3,8 +3,8 @@
 % - Alexandre Campos | Andre Pedrosa - %
 % --------------- 2015 --------------- %
 
-%% =============== DATA DATPVC =============== %%
-% ==================== PVC =================== %
+%% =============== DATA DATARR =============== %%
+% ================= Noise / VT =============== %
 
 % ----- Load ECG ----- %
 clear, clc, close all;
@@ -14,63 +14,79 @@ fs = 125;
 temp = what(fullfile(pwd,'DATARR'));
 files = fullfile('DATARR',temp.mat);
 
-load(files{5});
+results_table_noise = zeros(length(files),5);
+results_table_VT = zeros(length(files),5);
 
-ecg = DAT.ecg;
-ecg_class = DAT.class;
+index = 1;
 
-N = length(ecg);
-t = 0:(1/fs):N/fs-(1/fs);
-
-%% Preprocessing
-[ecg_norm , ecg_pre] = preProcessing( ecg , fs );
-
-%% ===== Feature Extraction and Peak Detection ===== %%
-windowsize = 5; %in seconds
-window = 1:(windowsize * fs);
-maxindex = floor( N / (fs*windowsize) );
-
-if maxindex<1; disp('Adjust windowsize: too large.'); end
-
-RPeakIndexes = zeros(N,1);
-HIST = zeros(maxindex,1); 
-BPM = zeros(maxindex,1); %BPM per window
-DIFF = zeros(maxindex,1); 
-AUC = zeros(maxindex,1); %AUC per window
-AUCband = zeros(maxindex,4); %AUC per window
-RATIOfreq = zeros(maxindex,1);
-OTHER = zeros(maxindex,1);
-
-trueClass = zeros(maxindex,1);
-predictedClass = zeros(maxindex,1);
-Nclass = zeros(maxindex,3);
-
-for w = 1:maxindex
-    sub_ecg = ecg_norm (window);
+while index < length(files)
+    fprintf('========== File %s ==========\n',files{index});
+    [ ecg , ecg_class , N , t ] = loadARRFile( index , fs , files);
     
-    Nclass(w,:) = sum([ecg_class(window)==0 ecg_class(window)==-1 ecg_class(window)==4]);
+    %% Preprocessing
+    % [ecg_norm , ecg_pre] = preProcessing( ecg , fs );
     
-    if Nclass(w,2) * 2 > Nclass(w,1)
-        trueClass(w) = -1;
-    elseif Nclass(w,3) * 2 > Nclass(w,1)
-        trueClass(w) = 4;
+    %% ===== Feature Extraction and Peak Detection ===== %%
+    windowsize = 5; %in seconds
+    window = 1:(windowsize * fs);
+    maxindex = floor( N / (fs*windowsize) );
+    
+    if maxindex<1; disp('Adjust windowsize: too large.'); end
+    
+    RPeakIndexes = zeros(N,1);
+    HIST = zeros(maxindex,1);
+    BPM = zeros(maxindex,1); %BPM per window
+    DIFF = zeros(maxindex,1);
+    AUC = zeros(maxindex,1); %AUC per window
+    AUCband = zeros(maxindex,4); %AUC per window
+    RATIOfreq = zeros(maxindex,1);
+    S_LOWER = zeros(maxindex,1);
+    
+    trueClass = zeros(maxindex,1);
+    predictedClass = zeros(maxindex,1);
+    Nclass = zeros(maxindex,3);
+    
+    for w = 1:maxindex
+        
+        [sub_ecg , ~] = preProcessing( ecg(window) , fs );
+        
+        %     sub_ecg = ecg_norm (window);
+        
+        Nclass(w,:) = sum([ecg_class(window)==0 ecg_class(window)==-1 ecg_class(window)==4]);
+        
+        if Nclass(w,2) * 2 > Nclass(w,1)
+            trueClass(w) = -1;
+        elseif Nclass(w,3) * 2 > Nclass(w,1)
+            trueClass(w) = 4;
+        end
+        
+        [ BPM(w) , HIST(w) , DIFF(w) , ...
+            AUC(w) , AUCband(w,:) , RATIOfreq(w) , S_LOWER(w)] = ...
+            featExtract( sub_ecg , fs );
+        
+        predictedClass(w) = noiseDetector(HIST(w) , BPM(w) , ...
+            DIFF(w) , AUC(w) ,AUCband(w,:) , RATIOfreq(w) , S_LOWER(w));
+        
+        window = window + fs*windowsize;
     end
     
-    [ RwindowIndexes , HIST(w) , BPM(w) , DIFF(w) , ...
-        AUC(w) , AUCband(w,:) , RATIOfreq(w) , OTHER(w)] = ...
-            noiseFeatExtract( sub_ecg , fs );
-     
-    RPeakIndexes(RwindowIndexes + window(1) - 1) = 1;
-     
-    predictedClass(w) = noiseDetector(HIST(w) , BPM(w) , ...
-                DIFF(w) , AUC(w) ,AUCband(w,:) , RATIOfreq(w) , OTHER(w));
+    %% ===== Noise and VT Detector ===== %%
+    [predictedNoiseClass , predictedVTClass ] = noiseVTDetectorFull( trueClass , BPM , HIST , DIFF , ...
+        AUC , AUCband , RATIOfreq , S_LOWER);
     
-    window = window + fs*windowsize;
+    %% ===== Accuracy ===== %%
+    [results_table_noise(index,:), results_table_VT(index,:)] = windowComparator(trueClass , predictedNoiseClass , predictedVTClass , true, false);
+    
+    index = index + 1;
+
+    fprintf('============================================\n')
 end
 
-%%
-predictedClass2 = noiseDetectorFull( trueClass , HIST , BPM , DIFF , ...
-    AUC , AUCband , RATIOfreq , OTHER);
+%% Display Tables
+Noise = table(temp.mat,results_table_noise(:,1),results_table_noise(:,2),results_table_noise(:,3),results_table_noise(:,4),results_table_noise(:,5),'VariableNames',{'File' 'Detected' 'Real' 'Specificity' 'Sensibility' 'Accuracy'})
+VT = table(temp.mat,results_table_VT(:,1),results_table_VT(:,2),results_table_VT(:,3),results_table_VT(:,4),results_table_VT(:,5),'VariableNames',{'File' 'Detected' 'Real' 'Specificity' 'Sensibility' 'Accuracy'})
+
+
 
 %%
 figure
@@ -93,7 +109,7 @@ hold on
 line([0 length(BPM)],[mean(BPM)-std(BPM) mean(BPM)-std(BPM)],'Color','g')
 hold on
 line([0 length(BPM)],[mean(BPM)+std(BPM) mean(BPM)+std(BPM)],'Color','g')
-subplot(2,1,2); plot(ecg_class,'o--'); xlim([0 length(ecg_class)])
+subplot(2,1,2); plot(trueClass,'o--'); xlim([0 length(trueClass)])
 
 %%
 figure
@@ -156,13 +172,13 @@ subplot(2,1,2); plot(ecg_class,'o--'); xlim([0 length(ecg_class)])
 
 %%
 figure
-subplot(2,1,1); plot(OTHER,'o--'); xlim([0 length(OTHER)])
+subplot(2,1,1); plot(S_LOWER,'o--'); xlim([0 length(S_LOWER)])
 hold on
-line([0 length(OTHER)],[mean(OTHER) mean(OTHER)],'Color','r')
+line([0 length(S_LOWER)],[mean(S_LOWER) mean(S_LOWER)],'Color','r')
 hold on
-line([0 length(OTHER)],[mean(OTHER)-std(OTHER) mean(OTHER)-std(OTHER)],'Color','g')
+line([0 length(S_LOWER)],[mean(S_LOWER)-std(S_LOWER) mean(S_LOWER)-std(S_LOWER)],'Color','g')
 hold on
-line([0 length(OTHER)],[mean(OTHER)+std(OTHER) mean(OTHER)+std(OTHER)],'Color','g')
+line([0 length(S_LOWER)],[mean(S_LOWER)+std(S_LOWER) mean(S_LOWER)+std(S_LOWER)],'Color','g')
 subplot(2,1,2); plot(ecg_class,'o--'); xlim([0 length(ecg_class)])
 
 
