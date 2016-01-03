@@ -1,6 +1,16 @@
 function [ ecg , Rind , PVCind , N , t ] = loadPVCFile( index , fs , files )
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+%loadPVCFile Load files in DATPVC folder
+% Inputs: 
+%   --> index - file number
+%   --> fs - Sampling frequency (Hz)
+%   --> files - cell with file names
+%
+% Outputs:
+%   --> ecg - ECG signal
+%   --> Rind - R peak indexes
+%   --> PVCind - PVC bynary indexes
+%   --> N - number of data points
+%   --> t - time vector
 
 load(files{index});
 

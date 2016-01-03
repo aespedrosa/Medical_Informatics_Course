@@ -1,7 +1,7 @@
 %% ---------- ECG Analysis ----------- %%
 % -------- Informatica Medica -------- %
 % - Alexandre Campos | Andre Pedrosa - %
-% --------------- 2015 --------------- %
+% ------------- 2015/2016 ------------ %
 
 %% =============== DATA DATARR =============== %%
 % ================= Noise / VT =============== %
@@ -21,10 +21,8 @@ index = 1;
 
 while index <= length(files)
     fprintf('========== File %s ==========\n',files{index});
-    [ ecg , ecg_class , N , t ] = loadARRFile( index , fs , files);
     
-    %% Preprocessing
-    % [ecg_norm , ecg_pre] = preProcessing( ecg , fs );
+    [ ecg , ecg_class , N , t ] = loadARRFile( index , fs , files);
     
     %% ===== Feature Extraction and Peak Detection ===== %%
     windowsize = 5; %in seconds
@@ -43,21 +41,12 @@ while index <= length(files)
     
     trueClass = zeros(maxindex,1);
     predictedClass = zeros(maxindex,1);
-    Nclass = zeros(maxindex,3);
     
     for w = 1:maxindex
         
         [sub_ecg , ~] = preProcessing( ecg(window) , fs );
         
-        %     sub_ecg = ecg_norm (window);
-        
-        Nclass(w,:) = sum([ecg_class(window)==0 ecg_class(window)==-1 ecg_class(window)==4]);
-        
-        if Nclass(w,2) * 2 > Nclass(w,1)
-            trueClass(w) = -1;
-        elseif Nclass(w,3) * 2 > Nclass(w,1)
-            trueClass(w) = 4;
-        end
+        [ trueClass(w) ] = realClassWindow( ecg_class , trueClass(w) , maxindex , w , window );
         
         [ BPM(w) , HIST(w) , DIFF(w) , ...
             AUC(w) , AUCband(w,:) , RATIOfreq(w)] = featExtract( sub_ecg , fs );
@@ -66,7 +55,7 @@ while index <= length(files)
     end
     
     %% ===== Noise and VT Detector ===== %%
-    [predictedNoiseClass , predictedVTClass ] = noiseVTDetectorFull( trueClass , BPM , HIST , DIFF , ...
+    [predictedNoiseClass , predictedVTClass ] = noiseVTDetector( trueClass , BPM , HIST , DIFF , ...
         AUC , AUCband , RATIOfreq);
     
     %% ===== Accuracy ===== %%

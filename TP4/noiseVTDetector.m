@@ -1,6 +1,13 @@
-function [ predictedNoiseClass , predictedVTClass ] = noiseVTDetectorFull( trueClass , BPM , HIST , DIFF , AUC , AUCband , RATIOfreq)
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+function [ predictedNoiseClass , predictedVTClass ] = noiseVTDetector( trueClass , BPM , HIST , DIFF , AUC , AUCband , RATIOfreq)
+%noiseVTDetector Returns the predicted classification for Noise and VT
+% Inputs:
+%   --> trueClass - window true classification vector
+%   --> BPM, HIST, DIFF, AUC, AUCband, RATIOfreq - features
+%
+% Outputs:
+%   --> predictedNoiseClass - window predicted classification vector for
+%   noise
+%   --> predictedVTClass - window predicted classification vector for VT
 
 predictedNoiseClass = zeros(size(trueClass));
 predictedVTClass = zeros(size(trueClass));

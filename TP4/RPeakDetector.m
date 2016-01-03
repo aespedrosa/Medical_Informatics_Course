@@ -1,6 +1,15 @@
-function [ RindexesECG , BPM ] = RPeakDetector( ecg , fs , display ,correction )
-%RPEAKDETECTOR Summary of this function goes here
-%   Detailed explanation goes here
+function [ RindexesECG , BPM ] = RPeakDetector( ecg , fs , display , correction )
+%RPeakDetector Return R peak indexes
+% Inputs:
+%   --> ecg - ECG signal
+%   --> fs - Sampling Frequency (Hz)
+%   --> display: boolean - display graphs
+%   --> correction: boolean - apply correction to avoid multiple false
+%   peaks (useful in noisy signals)
+%
+% Outputs:
+%   --> RindexesECG - R peak indexes in ECG
+%   --> BPM - beats per minute value (bpm)
 
 if nargin < 3
     display = false;

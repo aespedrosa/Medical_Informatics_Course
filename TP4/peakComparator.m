@@ -1,6 +1,16 @@
 function [ table_row ] = peakComparator(type, truePeaks , predictedPeaks , ecg , fs , displayConsole , displayGraphs)
-%PEAKCOMPARATOR Summary of this function goes here
-%   Detailed explanation goes here
+%peakComparator Returns performance for peak detection algorithms
+% Inputs:
+%   --> type: 'R' or 'PVC' - different display text and graphs
+%   --> truePeaks - binary vector with true classification
+%   --> predictedPeaks - binary vector with predited classification
+%   --> ecg - ecg signal
+%   --> fs - Sampling frequency (Hz)
+%   --> displayConsole: boolean - show results in console
+%   --> displayGraphs: boolean - show graphs
+%
+% Outputs:
+%   --> table_row - matrix with results (#files x 5)
 
 N = length(ecg);
 t = 0:(1/fs):N/fs-(1/fs);
@@ -34,17 +44,7 @@ B_acc = (SP + SE) / 2;
 table_row = [sum(predictedPeaks) sum(truePeaks) SP SE B_acc];
 
 switch type
-    case 'R'
-        % Method 1 - For R Peak Comparison
-        %         CM = confusionmat(truePeaks , predictedPeaks);
-        %
-        %         TN = CM(1,1); FN = CM(1,2);
-        %         FP = CM(2,1); TP = CM(2,2);
-        %
-        %         SP = TN * 100 / (TN + FP);
-        %         SE = TP * 100 / (TP + FN);
-        %         acc = (TP + TN) * 100 / N;
-        %         B_acc = (SP + SE) / 2;
+    case 'R'      
         if displayConsole
             fprintf('----- R Peak Detection Accuracy -----\n')
             fprintf('Peaks Detected: %d | True Peaks: %d \n',sum(predictedPeaks),sum(truePeaks));

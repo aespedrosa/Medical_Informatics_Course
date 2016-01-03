@@ -1,6 +1,11 @@
 function [ BPM , inside , difference , auc , aucband , ratio ] = featExtract( ecg_norm , fs )
-%UNTITLED5 Summary of this function goes here
-%   Detailed explanation goes here
+%featExtract Feature Extraction function for DATARR
+% Inputs:
+%   --> ecg_norm - normalized ECG signal
+%   --> fs - sampling frequency (Hz)
+%
+% Outputs:
+%   --> BPM, inside, difference, auc, aucband, ratio - features
 
 %% Histogram
 N = histcounts(diff(ecg_norm),[-0.1 0.1]);
@@ -44,4 +49,3 @@ int2 = trapz(Pxx(wp:suplimit));
 ratio = int1 / int2;
 
 end
-

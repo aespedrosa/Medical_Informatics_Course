@@ -1,6 +1,15 @@
 function [ table_row_noise , table_row_vt ] = windowComparator( trueClass , predictedNoiseClass , predictedVTClass , displayConsole , displayGraphs)
-%UNTITLED3 Summary of this function goes here
-%   Detailed explanation goes here
+%windowComparator Returns performance for noise/VT detection algorithms
+% Inputs:
+%   --> trueClass - 3 class vector with true classification
+%   --> predictedNoiseClass - vector with predited classification for noise
+%   --> predictedVTClass - vector with predited classification for VT
+%   --> displayConsole: boolean - show results in console
+%   --> displayGraphs: boolean - show graphs
+%
+% Outputs:
+%   --> table_row_noise - matrix with results for noise (#files x 6)
+%   --> table_row_vt - matrix with results for VT (#files x 6)
 
 if nargin < 4
     displayConsole = false;
@@ -75,4 +84,3 @@ if displayGraphs
 end
 
 end
-

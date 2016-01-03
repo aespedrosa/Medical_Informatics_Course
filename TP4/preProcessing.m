@@ -1,11 +1,17 @@
-function [ e0 , ecg_processed ] = preProcessing( ecg , fs )
-%UNTITLED3 Summary of this function goes here
-%   Detailed explanation goes here
+function [ ecg_norm , ecg_processed ] = preProcessing( ecg , fs )
+%preProcessing Preprocesses the ECG signal
+% Inputs:
+%   --> ecg - ECG signal
+%   --> fs - Sampling Frequency (Hz)
+%
+% Outputs:
+%   --> ecg_norm - Normalized ECG
+%   --> ecg_processed - Preprocessed ECG
 
 %% Normalization
 mean_ecg = mean(ecg);
-e0 = ecg - mean_ecg;
-e0 = e0 / max(e0);
+ecg_norm = ecg - mean_ecg;
+ecg_norm = ecg_norm / max(ecg_norm);
 
 %% Low Pass Filter
 order = 6;
@@ -13,7 +19,7 @@ wc = 30; %Cut-off freq in Hz
 fc = wc/(0.5*fs); %Normalized cut-off freq
 
 [b,a] = butter(order,fc,'low');
-e1 = filtfilt(b , a , e0);
+e1 = filtfilt(b , a , ecg_norm);
 
 %% High Pass Filter
 wc = 1;

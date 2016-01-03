@@ -1,6 +1,11 @@
 function [PVCindexes4] = pvcDetector( ecg , Rindexes )
-%PVCDETECTOR Summary of this function goes here
-%   Detailed explanation goes here
+%pvcDetector Returns the indexes with PVC
+% Inputs: 
+%   --> ecg - ECG signal
+%   --> Rindexes - R peak indexes vector
+%
+% Outputs:
+%   --> PVCindexes4 - vector with PVC indexes
 
 %% RR
 D = diff(Rindexes);
