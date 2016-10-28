@@ -1,9 +1,7 @@
-# Medical Informatics Course Repository
+# COM Interface Philips
 
-Projects:
-1 ) COM Interface Philips
-2 ) Dicom File Reader
-3 ) ECG Data Analyser
+Support Files:
+https://www.dropbox.com/sh/zwuk7v5fgnetecy/AAA_4P6apYB9Fj8cNP5qyMGKa?dl=0
 
 Authors:
 Alexandre Sayal, Biomedical Engineering MSc
